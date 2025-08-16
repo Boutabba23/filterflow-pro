@@ -3,8 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Wrench, Filter, Link2, AlertTriangle, Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export function DashboardOverview() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleNavigation = (path: string, message: string) => {
+    navigate(path);
+    toast({
+      title: "Navigation",
+      description: message,
+    });
+  };
+
   // Mock data - will be replaced with real data from Supabase
   const stats = [
     {
@@ -57,7 +70,10 @@ export function DashboardOverview() {
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input placeholder="Rechercher..." className="w-64" />
           </div>
-          <Button className="bg-primary hover:bg-primary-hover">
+          <Button 
+            className="bg-primary hover:bg-primary-hover"
+            onClick={() => handleNavigation('/engins', 'Redirection vers la gestion des engins')}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Nouvel engin
           </Button>
@@ -112,19 +128,43 @@ export function DashboardOverview() {
             <CardTitle className="text-foreground">Actions Rapides</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button variant="outline" className="w-full justify-start" size="sm">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start" 
+              size="sm"
+              onClick={() => handleNavigation('/engins', 'Redirection vers la gestion des engins')}
+            >
               <Wrench className="h-4 w-4 mr-2" />
               Ajouter un engin
             </Button>
-            <Button variant="outline" className="w-full justify-start" size="sm">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start" 
+              size="sm"
+              onClick={() => handleNavigation('/filtres', 'Redirection vers la gestion des filtres')}
+            >
               <Filter className="h-4 w-4 mr-2" />
               Nouvelle référence filtre
             </Button>
-            <Button variant="outline" className="w-full justify-start" size="sm">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start" 
+              size="sm"
+              onClick={() => handleNavigation('/compatibilites', 'Redirection vers les compatibilités')}
+            >
               <Link2 className="h-4 w-4 mr-2" />
               Mapper compatibilité
             </Button>
-            <Button variant="outline" className="w-full justify-start border-warning/20 text-warning hover:bg-warning/10" size="sm">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start border-warning/20 text-warning hover:bg-warning/10" 
+              size="sm"
+              onClick={() => toast({
+                title: "Alertes Stock",
+                description: "8 articles nécessitent votre attention",
+                variant: "destructive",
+              })}
+            >
               <AlertTriangle className="h-4 w-4 mr-2" />
               Voir alertes stock
             </Button>

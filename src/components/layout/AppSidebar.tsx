@@ -1,4 +1,5 @@
 import { Settings, Wrench, Filter, Link2, BarChart3 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -39,6 +40,8 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const location = useLocation();
+  
   return (
     <Sidebar>
       <SidebarContent className="bg-secondary">
@@ -51,10 +54,15 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url} className="text-secondary-foreground hover:text-accent">
+                    <Link 
+                      to={item.url} 
+                      className={`text-secondary-foreground hover:text-accent ${
+                        location.pathname === item.url ? 'bg-accent/10 text-accent' : ''
+                      }`}
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
