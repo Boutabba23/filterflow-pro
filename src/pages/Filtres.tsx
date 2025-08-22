@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Search, Edit, Trash2, Filter, Package, Link } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Filter, Package, Link as LinkIcon } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Filtres() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -232,7 +233,12 @@ export default function Filtres() {
                   <TableRow key={filtre.id}>
                     <TableCell>
                       <div>
-                        <div className="font-mono font-medium text-foreground">{filtre.referencePrincipale}</div>
+                        <Link
+                          to={`/filtres/${filtre.id}`}
+                          className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium font-mono"
+                        >
+                          {filtre.referencePrincipale}
+                        </Link>
                         <div className="text-sm text-muted-foreground max-w-48 truncate">
                           {filtre.description}
                         </div>
@@ -246,7 +252,7 @@ export default function Filtres() {
                     <TableCell className="text-foreground">{filtre.fabricant}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Link className="h-3 w-3 text-muted-foreground" />
+                        <LinkIcon className="h-3 w-3 text-muted-foreground" />
                         <span className="text-sm font-mono">
                           {filtre.referencesCompatibles.length} ref.
                         </span>

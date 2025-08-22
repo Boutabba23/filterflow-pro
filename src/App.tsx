@@ -6,9 +6,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Engins from "./pages/Engins";
 import Filtres from "./pages/Filtres"; 
-import Compatibilites from "./pages/Compatibilites";
 import Configuration from "./pages/Configuration";
 import NotFound from "./pages/NotFound";
+import EnginDetails from "./pages/EnginDetails";
+import FilterDetails from "./pages/FilterDetails";
 
 const queryClient = new QueryClient();
 
@@ -21,8 +22,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/engins" element={<Engins />} />
+          <Route path="/engins/:id" element={<EnginDetails />} />
           <Route path="/filtres" element={<Filtres />} />
-          <Route path="/compatibilites" element={<Compatibilites />} />
+          <Route path="/filtres/:id" element={<FilterDetails />} />
           <Route path="/config" element={<Configuration />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

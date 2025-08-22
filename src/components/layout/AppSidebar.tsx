@@ -28,11 +28,6 @@ const items = [
     icon: Filter,
   },
   {
-    title: "Compatibilités",
-    url: "/compatibilites",
-    icon: Link2,
-  },
-  {
     title: "Configuration",
     url: "/config",
     icon: Settings,

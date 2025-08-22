@@ -37,6 +37,7 @@ import {
   HourglassIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function Engins() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -204,7 +205,12 @@ export default function Engins() {
                   <TableRow key={engin.id}>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        {engin.code}
+                        <Link 
+                          to={`/engins/${engin.id}`}
+                          className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium"
+                        >
+                          {engin.code}
+                        </Link>
                       </div>
                     </TableCell>
                     <TableCell>
