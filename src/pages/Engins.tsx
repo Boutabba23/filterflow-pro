@@ -250,9 +250,65 @@ export default function Engins() {
 
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-3 w-3" />
-                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Modifier l'engin - {engin.code}</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-code">Code Engin</Label>
+                                  <Input id="edit-code" defaultValue={engin.code} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-modele">Désignation</Label>
+                                  <Input id="edit-modele" defaultValue={engin.désignation} />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-fabricant">Marque</Label>
+                                  <Input id="edit-fabricant" defaultValue={engin.marque} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-annee">Type</Label>
+                                  <Input id="edit-annee" defaultValue={engin.type} />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-heures">Heures de Service</Label>
+                                  <Input id="edit-heures" type="number" defaultValue={engin.heures} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-statut">Statut</Label>
+                                  <Select defaultValue={engin.statut.toLowerCase()}>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="actif">Actif</SelectItem>
+                                      <SelectItem value="maintenance">En Maintenance</SelectItem>
+                                      <SelectItem value="inactif">Inactif</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex justify-end space-x-2">
+                              <Button variant="outline">Annuler</Button>
+                              <Button className="bg-primary hover:bg-primary-hover">
+                                Sauvegarder
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                         <Button
                           variant="outline"
                           size="sm"

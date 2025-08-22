@@ -328,9 +328,46 @@ export default function FilterDetails() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Modifier la référence - {cross.référence}</DialogTitle>
+                              </DialogHeader>
+                              <div className="grid gap-4 py-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-cross-ref">Référence</Label>
+                                  <Input id="edit-cross-ref" defaultValue={cross.référence} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-cross-fabricant">Fabricant</Label>
+                                  <Input id="edit-cross-fabricant" defaultValue={cross.fabricant} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-cross-prix">Prix (€)</Label>
+                                  <Input id="edit-cross-prix" type="number" step="0.01" defaultValue={cross.prix} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-cross-stock">Stock</Label>
+                                  <Input id="edit-cross-stock" type="number" defaultValue={cross.stock} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-cross-delai">Délai de Livraison</Label>
+                                  <Input id="edit-cross-delai" defaultValue={cross.delaiLivraison} />
+                                </div>
+                              </div>
+                              <div className="flex justify-end space-x-2">
+                                <Button variant="outline">Annuler</Button>
+                                <Button className="bg-primary hover:bg-primary-hover">
+                                  Sauvegarder
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                           <Button
                             variant="outline"
                             size="sm"

@@ -296,9 +296,71 @@ export default function Filtres() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-3 w-3" />
-                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Modifier le filtre - {filtre.referencePrincipale}</DialogTitle>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-ref">Référence Principale</Label>
+                                  <Input id="edit-ref" defaultValue={filtre.referencePrincipale} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-type">Type</Label>
+                                  <Select defaultValue={filtre.type.toLowerCase().replace(' ', '-')}>
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="huile-moteur">Huile moteur</SelectItem>
+                                      <SelectItem value="carburant">Carburant</SelectItem>
+                                      <SelectItem value="air">Air</SelectItem>
+                                      <SelectItem value="hydraulique">Hydraulique</SelectItem>
+                                      <SelectItem value="transmission">Transmission</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-fabricant">Fabricant</Label>
+                                  <Input id="edit-fabricant" defaultValue={filtre.fabricant} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-prix">Prix Unitaire (€)</Label>
+                                  <Input id="edit-prix" type="number" step="0.01" defaultValue={filtre.prixUnitaire} />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-stock">Stock</Label>
+                                  <Input id="edit-stock" type="number" defaultValue={filtre.stock} />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-delai">Engins Compatibles</Label>
+                                  <Input id="edit-delai" type="number" defaultValue={filtre.enginCompatibles} />
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="edit-description">Description</Label>
+                                <Input id="edit-description" defaultValue={filtre.description} />
+                              </div>
+                            </div>
+                            <div className="flex justify-end space-x-2">
+                              <Button variant="outline">Annuler</Button>
+                              <Button className="bg-primary hover:bg-primary-hover">
+                                Sauvegarder
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                         <Button variant="outline" size="sm" className="text-destructive border-destructive/20 hover:bg-destructive/10">
                           <Trash2 className="h-3 w-3" />
                         </Button>
