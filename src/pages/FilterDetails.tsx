@@ -221,18 +221,7 @@ export default function FilterDetails() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="fabricant">Fabricant</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner fabricant" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="fleetguard">Fleetguard</SelectItem>
-                          <SelectItem value="donaldson">Donaldson</SelectItem>
-                          <SelectItem value="mann">Mann Filter</SelectItem>
-                          <SelectItem value="mahle">Mahle</SelectItem>
-                          <SelectItem value="bosch">Bosch</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input id="fabricant" placeholder="ex: Fleetguard" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="prix">Prix (€)</Label>
@@ -241,19 +230,6 @@ export default function FilterDetails() {
                     <div className="space-y-2">
                       <Label htmlFor="stock">Stock</Label>
                       <Input id="stock" type="number" placeholder="0" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="fiabilité">Fiabilité</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Niveau de fiabilité" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="haute">Haute</SelectItem>
-                          <SelectItem value="moyenne">Moyenne</SelectItem>
-                          <SelectItem value="faible">Faible</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="delai">Délai de Livraison</Label>
