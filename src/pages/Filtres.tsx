@@ -49,8 +49,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Filtres() {
+  const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [filtreToDelete, setFiltreToDelete] = useState<number | null>(null);
@@ -236,7 +238,7 @@ export default function Filtres() {
     <MainLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-foreground">
               Gestion des Filtres
@@ -247,12 +249,12 @@ export default function Filtres() {
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary-hover">
+              <Button className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Nouveau Filtre
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}>
               <DialogHeader>
                 <DialogTitle>Ajouter un Nouveau Filtre</DialogTitle>
               </DialogHeader>
@@ -275,7 +277,7 @@ export default function Filtres() {
                     </p>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
                   <div className="space-y-2">
                     <Label htmlFor="reference">Référence Principale</Label>
                     <Input
@@ -324,7 +326,7 @@ export default function Filtres() {
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
                   <div className="space-y-2">
                     <Label htmlFor="fabricant">Fabricant</Label>
                     <Input
@@ -380,12 +382,12 @@ export default function Filtres() {
                   )}
                 </div>
               </div>
-              <div className="flex justify-end space-x-2">
+              <div className={`${isMobile ? "flex flex-col" : "flex"} justify-end space-x-2 ${isMobile ? "space-y-2" : ""}`}>
                 <DialogClose asChild>
-                  <Button variant="outline">Annuler</Button>
+                  <Button variant="outline" className={isMobile ? "w-full" : ""}>Annuler</Button>
                 </DialogClose>
                 <Button
-                  className="bg-primary hover:bg-primary-hover"
+                  className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
                   onClick={handleAddFiltre}
                 >
                   Ajouter
@@ -398,8 +400,8 @@ export default function Filtres() {
         {/* Search and Filters */}
         <Card className="shadow-card">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="flex-1 relative">
+            <div className={`${isMobile ? "flex flex-col space-y-4" : "flex items-center"} gap-4`}>
+              <div className={`${isMobile ? "w-full" : "flex-1"} relative`}>
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Rechercher par référence, type, fabricant..."
@@ -409,7 +411,7 @@ export default function Filtres() {
                 />
               </div>
               <Select>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className={`${isMobile ? "w-full" : "w-48"}`}>
                   <SelectValue placeholder="Filtrer par type" />
                 </SelectTrigger>
                 <SelectContent>
