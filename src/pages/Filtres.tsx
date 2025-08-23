@@ -247,154 +247,156 @@ export default function Filtres() {
               Gérez vos références de filtres et compatibilités
             </p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary-hover">
-                <Plus className="h-4 w-4 mr-2" />
-                Nouveau Filtre
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Ajouter un Nouveau Filtre</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="designation">Désignation</Label>
-                  <Input
-                    id="designation"
-                    placeholder="ex: Filtre à huile moteur"
-                    value={newDesignation}
-                    onChange={(e) => {
-                      setNewDesignation(e.target.value);
-                      setErrors({ ...errors, designation: "" });
-                    }}
-                    className={errors.designation ? "border-destructive" : ""}
-                  />
-                  {errors.designation && (
-                    <p className="text-sm text-destructive">
-                      {errors.designation}
-                    </p>
-                  )}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="reference">Référence Principale</Label>
-                    <Input
-                      id="reference"
-                      placeholder="ex: HF6177"
-                      value={newReference}
-                      onChange={(e) => {
-                        setNewReference(e.target.value);
-                        setErrors({ ...errors, reference: "" });
-                      }}
-                      className={errors.reference ? "border-destructive" : ""}
-                    />
-                    {errors.reference && (
-                      <p className="text-sm text-destructive">
-                        {errors.reference}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Type de Filtre</Label>
-                    <Select
-                      value={newType}
-                      onValueChange={(value) => {
-                        setNewType(value);
-                        setErrors({ ...errors, type: "" });
-                      }}
-                    >
-                      <SelectTrigger
-                        className={errors.type ? "border-destructive" : ""}
-                      >
-                        <SelectValue placeholder="Sélectionner le type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="hydraulique">Hydraulique</SelectItem>
-                        <SelectItem value="air">Air</SelectItem>
-                        <SelectItem value="carburant">Carburant</SelectItem>
-                        <SelectItem value="huile">Huile</SelectItem>
-                        <SelectItem value="transmission">
-                          Transmission
-                        </SelectItem>
-                        <SelectItem value="cabine">Cabine</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.type && (
-                      <p className="text-sm text-destructive">{errors.type}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fabricant">Fabricant</Label>
-                    <Input
-                      id="fabricant"
-                      placeholder="ex: Caterpillar, Fleetguard..."
-                      value={newFabricant}
-                      onChange={(e) => {
-                        setNewFabricant(e.target.value);
-                        setErrors({ ...errors, fabricant: "" });
-                      }}
-                      className={errors.fabricant ? "border-destructive" : ""}
-                    />
-                    {errors.fabricant && (
-                      <p className="text-sm text-destructive">
-                        {errors.fabricant}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="prix">Prix Unitaire (€)</Label>
-                    <Input
-                      id="prix"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={newPrix}
-                      onChange={(e) => {
-                        setNewPrix(e.target.value);
-                        setErrors({ ...errors, prix: "" });
-                      }}
-                      className={errors.prix ? "border-destructive" : ""}
-                    />
-                    {errors.prix && (
-                      <p className="text-sm text-destructive">{errors.prix}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="stock">Stock Initial</Label>
-                  <Input
-                    id="stock"
-                    type="number"
-                    placeholder="0"
-                    value={newStock}
-                    onChange={(e) => {
-                      setNewStock(e.target.value);
-                      setErrors({ ...errors, stock: "" });
-                    }}
-                    className={errors.stock ? "border-destructive" : ""}
-                  />
-                  {errors.stock && (
-                    <p className="text-sm text-destructive">{errors.stock}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <DialogClose asChild>
-                  <Button variant="outline">Annuler</Button>
-                </DialogClose>
-                <Button
-                  className="bg-primary hover:bg-primary-hover"
-                  onClick={handleAddFiltre}
-                >
-                  Ajouter
+          <div className="flex justify-center">
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary-hover">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau Filtre
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Ajouter un Nouveau Filtre</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="designation">Désignation</Label>
+                    <Input
+                      id="designation"
+                      placeholder="ex: Filtre à huile moteur"
+                      value={newDesignation}
+                      onChange={(e) => {
+                        setNewDesignation(e.target.value);
+                        setErrors({ ...errors, designation: "" });
+                      }}
+                      className={errors.designation ? "border-destructive" : ""}
+                    />
+                    {errors.designation && (
+                      <p className="text-sm text-destructive">
+                        {errors.designation}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reference">Référence Principale</Label>
+                      <Input
+                        id="reference"
+                        placeholder="ex: HF6177"
+                        value={newReference}
+                        onChange={(e) => {
+                          setNewReference(e.target.value);
+                          setErrors({ ...errors, reference: "" });
+                        }}
+                        className={errors.reference ? "border-destructive" : ""}
+                      />
+                      {errors.reference && (
+                        <p className="text-sm text-destructive">
+                          {errors.reference}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="type">Type de Filtre</Label>
+                      <Select
+                        value={newType}
+                        onValueChange={(value) => {
+                          setNewType(value);
+                          setErrors({ ...errors, type: "" });
+                        }}
+                      >
+                        <SelectTrigger
+                          className={errors.type ? "border-destructive" : ""}
+                        >
+                          <SelectValue placeholder="Sélectionner le type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hydraulique">Hydraulique</SelectItem>
+                          <SelectItem value="air">Air</SelectItem>
+                          <SelectItem value="carburant">Carburant</SelectItem>
+                          <SelectItem value="huile">Huile</SelectItem>
+                          <SelectItem value="transmission">
+                            Transmission
+                          </SelectItem>
+                          <SelectItem value="cabine">Cabine</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.type && (
+                        <p className="text-sm text-destructive">{errors.type}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fabricant">Fabricant</Label>
+                      <Input
+                        id="fabricant"
+                        placeholder="ex: Caterpillar, Fleetguard..."
+                        value={newFabricant}
+                        onChange={(e) => {
+                          setNewFabricant(e.target.value);
+                          setErrors({ ...errors, fabricant: "" });
+                        }}
+                        className={errors.fabricant ? "border-destructive" : ""}
+                      />
+                      {errors.fabricant && (
+                        <p className="text-sm text-destructive">
+                          {errors.fabricant}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="prix">Prix Unitaire (€)</Label>
+                      <Input
+                        id="prix"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={newPrix}
+                        onChange={(e) => {
+                          setNewPrix(e.target.value);
+                          setErrors({ ...errors, prix: "" });
+                        }}
+                        className={errors.prix ? "border-destructive" : ""}
+                      />
+                      {errors.prix && (
+                        <p className="text-sm text-destructive">{errors.prix}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="stock">Stock Initial</Label>
+                    <Input
+                      id="stock"
+                      type="number"
+                      placeholder="0"
+                      value={newStock}
+                      onChange={(e) => {
+                        setNewStock(e.target.value);
+                        setErrors({ ...errors, stock: "" });
+                      }}
+                      className={errors.stock ? "border-destructive" : ""}
+                    />
+                    {errors.stock && (
+                      <p className="text-sm text-destructive">{errors.stock}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <DialogClose asChild>
+                    <Button variant="outline">Annuler</Button>
+                  </DialogClose>
+                  <Button
+                    className="bg-primary hover:bg-primary-hover"
+                    onClick={handleAddFiltre}
+                  >
+                    Ajouter
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Search and Filters */}
