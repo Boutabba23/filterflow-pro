@@ -130,8 +130,23 @@ export default function Filtres() {
   };
 
   const loadFiltres = async () => {
+    console.log("Début du chargement des filtres");
     try {
+      // Tester la connexion à Supabase
+      const { data: testData, error: testError } = await supabase.from('filtres').select('count', { count: 'exact', head: true });
+      if (testError) {
+        console.error('Erreur de connexion à Supabase:', testError);
+        toast({
+          title: "Erreur de connexion",
+          description: "Impossible de se connecter à la base de données",
+          variant: "destructive",
+        });
+        return;
+      }
+      console.log('Connexion à Supabase réussie');
+      
       // Récupérer les filtres avec leurs engins associés
+      console.log("Tentative de récupération des filtres");
       const { data: filtresData, error } = await supabase
         .from("filtres")
         .select(
