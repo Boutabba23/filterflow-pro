@@ -68,6 +68,7 @@ export default function Engins() {
     marque: "",
     type: "",
     heures: 0,
+    derniere_maintenance_preventive: new Date().getTime(),
   });
 
   const [formData, setFormData] = useState({
@@ -76,6 +77,7 @@ export default function Engins() {
     marque: "",
     type: "",
     heures: 0,
+    derniere_maintenance_preventive: new Date().getTime(),
   });
   const resetForm = () => {
     setFormData({
@@ -84,6 +86,7 @@ export default function Engins() {
       marque: "",
       type: "",
       heures: 0,
+      derniere_maintenance_preventive: new Date().getTime(),
     });
     setErrors({});
   };
@@ -130,6 +133,7 @@ export default function Engins() {
       marque: engin.marque,
       type: engin.type,
       heures: engin.heures,
+      derniere_maintenance_preventive: engin.derniereMaintenancePréventive,
     });
     setEditOpen(true);
   };
@@ -171,6 +175,12 @@ export default function Engins() {
     if (isNaN(Number(formData.heures)) || Number(formData.heures) < 0) {
       newErrors.heures = "Les heures doivent être un nombre positif";
     }
+    if (
+      isNaN(new Date(formData.derniere_maintenance_preventive).getTime()) ||
+      new Date(formData.derniere_maintenance_preventive).getTime() < 0
+    ) {
+      newErrors.heures = "Les heures doivent être un nombre positif";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -187,8 +197,6 @@ export default function Engins() {
         marque: formData.marque,
         type: formData.type,
         heures: Number(formData.heures),
-
-        filtres: undefined,
         derniere_maintenance_preventive: "",
       });
 
@@ -219,6 +227,12 @@ export default function Engins() {
         marque: editFormData.marque,
         type: editFormData.type,
         heures: Number(editFormData.heures),
+        derniere_maintenance_preventive:
+          editFormData.derniere_maintenance_preventive
+            ? new Date(
+                editFormData.derniere_maintenance_preventive
+              ).toISOString()
+            : null,
       });
 
       setEngins((prev) =>
@@ -471,7 +485,7 @@ export default function Engins() {
                             {engin.code}
                           </Link>
                         </TableCell>
-                        <TableCell>{engin.désignation}</TableCell>
+                        <TableCell>{engin.designation}</TableCell>
                         <TableCell>{engin.marque}</TableCell>
                         <TableCell>
                           <Badge
@@ -491,7 +505,7 @@ export default function Engins() {
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3 text-muted-foreground" />
                             {new Date(
-                              engin.derniereMaintenancePréventive
+                              engin.derniere_maintenance_preventive
                             ).toLocaleDateString("fr-FR")}
                           </div>
                         </TableCell>

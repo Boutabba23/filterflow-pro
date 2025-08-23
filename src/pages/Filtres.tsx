@@ -132,56 +132,57 @@ export default function Filtres() {
   const loadFiltres = async () => {
     console.log("Début du chargement des filtres");
     try {
-      // Tester la connexion à Supabase
-      const { data: testData, error: testError } = await supabase.from('filtres').select('count', { count: 'exact', head: true });
-      if (testError) {
-        console.error('Erreur de connexion à Supabase:', testError);
-        toast({
-          title: "Erreur de connexion",
-          description: "Impossible de se connecter à la base de données",
-          variant: "destructive",
-        });
+      // Utiliser la fonction fetchFiltres de database-utils.ts
+      console.log("Tentative de récupération des filtres via database-utils");
+      const filtresData = await fetchFiltres();
+      
+      if (!filtresData) {
+        console.log('Aucun filtre trouvé');
+        setFiltres([]);
         return;
       }
-      console.log('Connexion à Supabase réussie');
       
-      // Récupérer les filtres avec leurs engins associés
-      console.log("Tentative de récupération des filtres");
-      const { data: filtresData, error } = await supabase
-        .from("filtres")
-        .select(
-          `
-          *,
-          engin_filtre_compatibility (
-            engin_id,
-            engin:engin_id (
-              id,
-              code,
-              designation
-            )
-          )
-        `
-        )
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      // Transformer les données pour inclure le nom de l'engin associé
-      const filtresWithEngin = filtresData.map((filtre) => {
-        // Extraire le nom de l'engin s'il existe
-        const enginAssocie =
-          filtre.engin_filtre_compatibility &&
-          filtre.engin_filtre_compatibility.length > 0
-            ? filtre.engin_filtre_compatibility[0]?.engin
+      console.log(`${filtresData.length} filtres récupérés`);
+      
+      // Récupérer les relations engin-filtre pour chaque filtre
+      const filtresWithEngin = await Promise.all(
+        filtresData.map(async (filtre) => {
+          // Récupérer les engins compatibles pour ce filtre
+          const { data: enginCompatibility, error: enginError } = await supabase
+            .from('engin_filtre_compatibility')
+            .select(`
+              engin_id,
+              engin:engin_id (
+                id,
+                code,
+                designation
+              )
+            `)
+            .eq('filtre_id', filtre.id);
+            
+          if (enginError) {
+            console.error('Erreur récupération engins compatibles:', enginError);
+            return {
+              ...filtre,
+              enginNom: null,
+              engin_filtre_compatibility: []
+            };
+          }
+          
+          // Extraire le nom de l'engin s'il existe
+          const enginAssocie = enginCompatibility && enginCompatibility.length > 0
+            ? enginCompatibility[0]?.engin
             : null;
 
-        return {
-          ...filtre,
-          enginNom: enginAssocie
-            ? `${enginAssocie.code} - ${enginAssocie.designation}`
-            : null,
-        };
-      });
+          return {
+            ...filtre,
+            enginNom: enginAssocie
+              ? `${enginAssocie.code} - ${enginAssocie.designation}`
+              : null,
+            engin_filtre_compatibility: enginCompatibility || []
+          };
+        })
+      );
 
       setFiltres(filtresWithEngin);
     } catch (error) {
