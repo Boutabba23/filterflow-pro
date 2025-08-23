@@ -212,7 +212,7 @@ export default function Engins() {
 
   const confirmDeleteEngin = () => {
     if (enginToDelete !== null) {
-      setEngins(engins.filter(engin => engin.id !== enginToDelete));
+      setEngins(engins.filter((engin) => engin.id !== enginToDelete));
       setEnginToDelete(null);
       setDeleteDialogOpen(false);
     }
@@ -289,7 +289,9 @@ export default function Engins() {
                       className={errors.désignation ? "border-destructive" : ""}
                     />
                     {errors.désignation && (
-                      <p className="text-sm text-destructive">{errors.désignation}</p>
+                      <p className="text-sm text-destructive">
+                        {errors.désignation}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -304,7 +306,9 @@ export default function Engins() {
                       className={errors.marque ? "border-destructive" : ""}
                     />
                     {errors.marque && (
-                      <p className="text-sm text-destructive">{errors.marque}</p>
+                      <p className="text-sm text-destructive">
+                        {errors.marque}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -333,7 +337,9 @@ export default function Engins() {
                       className={errors.heures ? "border-destructive" : ""}
                     />
                     {errors.heures && (
-                      <p className="text-sm text-destructive">{errors.heures}</p>
+                      <p className="text-sm text-destructive">
+                        {errors.heures}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -388,7 +394,6 @@ export default function Engins() {
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wrench className="h-5 w-5 text-primary" />
               Liste des Engins ({filteredEngins.length})
             </CardTitle>
           </CardHeader>
@@ -447,7 +452,9 @@ export default function Engins() {
                           <div className="flex justify-end gap-2">
                             <Dialog
                               open={currentEngin?.id === engin.id && editOpen}
-                              onOpenChange={(open) => !open && setEditOpen(false)}
+                              onOpenChange={(open) =>
+                                !open && setEditOpen(false)
+                              }
                             >
                               <DialogTrigger asChild>
                                 <Button
@@ -467,7 +474,9 @@ export default function Engins() {
                                 <div className="grid gap-4 py-4">
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                      <Label htmlFor="edit-code">Code Engin</Label>
+                                      <Label htmlFor="edit-code">
+                                        Code Engin
+                                      </Label>
                                       <Input
                                         id="edit-code"
                                         value={editFormData.code}
@@ -487,7 +496,9 @@ export default function Engins() {
                                   </div>
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                      <Label htmlFor="edit-marque">Marque</Label>
+                                      <Label htmlFor="edit-marque">
+                                        Marque
+                                      </Label>
                                       <Input
                                         id="edit-marque"
                                         value={editFormData.marque}
@@ -569,12 +580,18 @@ export default function Engins() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer cet engin ? Cette action est irréversible et supprimera toutes les données associées.
+              Êtes-vous sûr de vouloir supprimer cet engin ? Cette action est
+              irréversible et supprimera toutes les données associées.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelDeleteEngin}>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteEngin} className="bg-destructive hover:bg-destructive-hover">
+            <AlertDialogCancel onClick={cancelDeleteEngin}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteEngin}
+              className="bg-destructive hover:bg-destructive-hover"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>

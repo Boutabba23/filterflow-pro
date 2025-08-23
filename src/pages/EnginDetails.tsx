@@ -1,5 +1,11 @@
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,7 +20,6 @@ import {
   ArrowLeft,
   Wrench,
   Calendar,
-  MapPin,
   HourglassIcon,
   Filter,
   ExternalLink,
@@ -25,7 +30,7 @@ export default function EnginDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Mock data - sera remplacé par les données Supabase
+  // Mock data - will be replaced by Supabase data
   const engin = {
     id: 1,
     code: "A03010236",
@@ -73,19 +78,6 @@ export default function EnginDetails() {
     ],
   };
 
-  const getStatusColor = (statut: string) => {
-    switch (statut) {
-      case "Actif":
-        return "bg-success/10 text-success border-success/20";
-      case "Maintenance":
-        return "bg-warning/10 text-warning border-warning/20";
-      case "Réparation":
-        return "bg-destructive/10 text-destructive border-destructive/20";
-      default:
-        return "bg-muted/10 text-muted-foreground border-muted/20";
-    }
-  };
-
   const getFilterStatusColor = (statut: string) => {
     switch (statut) {
       case "OK":
@@ -114,10 +106,10 @@ export default function EnginDetails() {
             Retour
           </Button>
           <div>
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">
               Détails de l'Engin - {engin.code}
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Informations complètes et filtres OEM
             </p>
           </div>
@@ -127,7 +119,6 @@ export default function EnginDetails() {
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wrench className="h-5 w-5 text-primary" />
               Informations Générales
             </CardTitle>
           </CardHeader>
@@ -181,71 +172,129 @@ export default function EnginDetails() {
           </CardContent>
         </Card>
 
-        {/* Filtres OEM Table */}
+        {/* Filtres OEM */}
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-primary" />
               Filtres OEM ({engin.filtres.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Référence OEM</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Position</TableHead>
-                  <TableHead>Fréquence</TableHead>
-                  <TableHead>Dernier Changement</TableHead>
+            {/* Desktop Table - Hidden on smaller screens */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Référence OEM</TableHead>
+                    <TableHead>Type</TableHead>
 
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {engin.filtres.map((filtre) => (
-                  <TableRow key={filtre.id}>
-                    <TableCell>
-                      <Link
-                        to={`/filtres/${filtre.id}`}
-                        className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium flex items-center gap-1"
-                      >
-                        {filtre.référence}
-                        <ExternalLink className="h-3 w-3" />
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="border-accent/20 text-accent"
-                      >
-                        {filtre.type}
+                    <TableHead>Dernier Changement</TableHead>
+
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {engin.filtres.map((filtre) => (
+                    <TableRow key={filtre.id}>
+                      <TableCell>
+                        <Link
+                          to={`/filtres/${filtre.id}`}
+                          className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium flex items-center gap-1"
+                        >
+                          {filtre.référence}
+                          <ExternalLink className="h-3 w-3" />
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="border-accent/20 text-accent"
+                        >
+                          {filtre.type}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3 text-muted-foreground" />
+                          {new Date(
+                            filtre.dernierChangement
+                          ).toLocaleDateString("fr-FR")}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to={`/filtres/${filtre.id}`}>Détails</Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Cards - Hidden on medium and larger screens */}
+            <div className="md:hidden space-y-4">
+              {engin.filtres.map((filtre) => (
+                <Card key={filtre.id} className="shadow-sm">
+                  <CardHeader>
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <CardTitle className="text-base mb-1">
+                          <Link
+                            to={`/filtres/${filtre.id}`}
+                            className="text-primary hover:text-primary-hover flex items-center gap-1"
+                          >
+                            {filtre.référence}
+                            <ExternalLink className="h-3 w-3" />
+                          </Link>
+                        </CardTitle>
+                        <Badge
+                          variant="outline"
+                          className="border-accent/20 text-accent"
+                        >
+                          {filtre.type}
+                        </Badge>
+                      </div>
+                      <Badge className={getFilterStatusColor(filtre.statut)}>
+                        {filtre.statut}
                       </Badge>
-                    </TableCell>
-                    <TableCell>{filtre.position}</TableCell>
-                    <TableCell className="font-mono">
-                      {filtre.fréquence} {filtre.unité}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Position</span>
+                      <span className="font-medium">{filtre.position}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Fréquence</span>
+                      <span className="font-mono">
+                        {filtre.fréquence} {filtre.unité}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Dernier</span>
+                      <span>
                         {new Date(filtre.dernierChangement).toLocaleDateString(
                           "fr-FR"
                         )}
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`/filtres/${filtre.id}`}>
-                          <ExternalLink className="h-3 w-3" />
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </span>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      asChild
+                    >
+                      <Link to={`/filtres/${filtre.id}`}>Voir les détails</Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

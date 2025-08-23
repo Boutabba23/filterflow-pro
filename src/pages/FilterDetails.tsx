@@ -1,5 +1,11 @@
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,10 +71,11 @@ export default function FilterDetails() {
   const [newCrossPrix, setNewCrossPrix] = useState("");
   const [newCrossStock, setNewCrossStock] = useState("");
   const [crossErrors, setCrossErrors] = useState<Record<string, string>>({});
-  const [editingCrossFilter, setEditingCrossFilter] = useState<number | null>(
+  const [editingCrossFilter, setEditingCrossFilter] = useState<any | null>(
     null
   );
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Mock catalogue filters – to be replaced by Supabase data
   const catalogueFiltres = [
@@ -187,13 +194,11 @@ export default function FilterDetails() {
     },
   ] as const;
 
-  // Retrieve current filter based on the URL id param
   const filtre = useMemo(
     () => catalogueFiltres.find((f) => f.id === Number(id)),
     [id]
   );
 
-  // Update displayed cross filters whenever the selected filtre changes
   useEffect(() => {
     if (filtre) {
       setCrossFilters([...filtre.crossFilters]);
@@ -248,45 +253,19 @@ export default function FilterDetails() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Add state to control dialog open/close
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // Function to close the dialog
-  const closeDialog = () => {
-    setIsDialogOpen(false);
-  };
-
-  // Function to open the dialog
-  const openDialog = () => {
-    setIsDialogOpen(true);
-  };
-
-  // Update the dialog open state
-  useEffect(() => {
-    // Use Radix Dialog component to control the dialog state
-    // No need to directly manipulate DOM elements
-  }, [isDialogOpen]);
-
   const handleAddCrossFilter = () => {
     if (!validateCrossForm()) return;
 
     const newCrossFilter = {
       id: Date.now(),
-      référence: newCrossReference.trim(),
+      reference: newCrossReference.trim(),
       fabricant: newCrossFabricant.trim(),
       prix: Number(newCrossPrix),
       stock: Number(newCrossStock),
     };
 
     setCrossFilters((prev) => [...prev, newCrossFilter]);
-    setNewCrossReference("");
-    setNewCrossFabricant("");
-    setNewCrossPrix("");
-    setNewCrossStock("");
-    setCrossErrors({});
-
-    // Only close the dialog if validation passes
-    closeDialog();
+    resetCrossForm();
   };
 
   const resetCrossForm = () => {
@@ -295,27 +274,24 @@ export default function FilterDetails() {
     setNewCrossPrix("");
     setNewCrossStock("");
     setCrossErrors({});
-    closeDialog();
+    setIsDialogOpen(false);
   };
 
-  const validateEditForm = (formData: Record<string, string>) => {
+  const validateEditForm = (formData: Record<string, any>) => {
     const errors: Record<string, string> = {};
 
-    if (!formData.référence?.trim()) {
-      errors.référence = "La référence est requise";
+    if (!formData.reference?.trim()) {
+      errors.reference = "La référence est requise";
     }
-
     if (!formData.fabricant?.trim()) {
       errors.fabricant = "Le fabricant est requis";
     }
-
-    if (!formData.prix?.trim()) {
+    if (formData.prix === "" || formData.prix === null) {
       errors.prix = "Le prix est requis";
     } else if (isNaN(Number(formData.prix)) || Number(formData.prix) <= 0) {
       errors.prix = "Le prix doit être un nombre positif";
     }
-
-    if (!formData.stock?.trim()) {
+    if (formData.stock === "" || formData.stock === null) {
       errors.stock = "Le stock est requis";
     } else if (
       isNaN(Number(formData.stock)) ||
@@ -324,14 +300,36 @@ export default function FilterDetails() {
     ) {
       errors.stock = "Le stock doit être un entier positif ou zéro";
     }
-
     return errors;
+  };
+
+  const handleSaveEdit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      id: editingCrossFilter.id,
+      reference: formData.get("reference") as string,
+      fabricant: formData.get("fabricant") as string,
+      prix: Number(formData.get("prix")),
+      stock: Number(formData.get("stock")),
+    };
+
+    const errors = validateEditForm(data);
+    if (Object.keys(errors).length === 0) {
+      setCrossFilters(
+        crossFilters.map((cf) => (cf.id === data.id ? data : cf))
+      );
+      setEditingCrossFilter(null);
+      setEditErrors({});
+    } else {
+      setEditErrors(errors);
+    }
   };
 
   const filteredCrossFilters = crossFilters.filter(
     (cross) =>
-      (cross.référence &&
-        cross.référence.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (cross.reference &&
+        cross.reference.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (cross.fabricant &&
         cross.fabricant.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -368,9 +366,93 @@ export default function FilterDetails() {
     );
   }
 
+  // Extracted Edit Dialog Content to avoid repetition
+  const editDialogContent = (cross: any) => (
+    <form className="px-2 sm:px-0" onSubmit={handleSaveEdit}>
+      <div className="grid gap-4 py-4 px-2 sm:px-0">
+        <div className="space-y-2">
+          <Label htmlFor="edit-cross-ref">Référence</Label>
+          <Input
+            id="edit-cross-ref"
+            name="reference"
+            defaultValue={cross.reference}
+            className={editErrors.reference ? "border-destructive" : ""}
+            onChange={() => setEditErrors({ ...editErrors, reference: "" })}
+          />
+          {editErrors.reference && (
+            <p className="text-sm text-destructive">{editErrors.reference}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="edit-cross-fabricant">Fabricant</Label>
+          <Input
+            id="edit-cross-fabricant"
+            name="fabricant"
+            defaultValue={cross.fabricant}
+            className={editErrors.fabricant ? "border-destructive" : ""}
+            onChange={() => setEditErrors({ ...editErrors, fabricant: "" })}
+          />
+          {editErrors.fabricant && (
+            <p className="text-sm text-destructive">{editErrors.fabricant}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="edit-cross-prix">Prix (DA)</Label>
+          <Input
+            id="edit-cross-prix"
+            name="prix"
+            type="number"
+            step="0.01"
+            defaultValue={cross.prix}
+            className={editErrors.prix ? "border-destructive" : ""}
+            onChange={() => setEditErrors({ ...editErrors, prix: "" })}
+          />
+          {editErrors.prix && (
+            <p className="text-sm text-destructive">{editErrors.prix}</p>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="edit-cross-stock">Stock</Label>
+          <Input
+            id="edit-cross-stock"
+            name="stock"
+            type="number"
+            defaultValue={cross.stock}
+            className={editErrors.stock ? "border-destructive" : ""}
+            onChange={() => setEditErrors({ ...editErrors, stock: "" })}
+          />
+          {editErrors.stock && (
+            <p className="text-sm text-destructive">{editErrors.stock}</p>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-col sm:flex-row justify-end gap-2 sm:space-x-2">
+        <DialogClose asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => {
+              setEditingCrossFilter(null);
+              setEditErrors({});
+            }}
+          >
+            Annuler
+          </Button>
+        </DialogClose>
+        <Button
+          type="submit"
+          className="w-full sm:w-auto bg-primary hover:bg-primary-hover"
+        >
+          Sauvegarder
+        </Button>
+      </div>
+    </form>
+  );
+
   return (
     <MainLayout>
-      <div className="space-y-4 sm:space-y-6 p-2 sm:p-0">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header with back button */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
           <Button
@@ -396,7 +478,6 @@ export default function FilterDetails() {
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-primary" />
               Informations Filtre OEM
             </CardTitle>
           </CardHeader>
@@ -420,23 +501,22 @@ export default function FilterDetails() {
               <div className="space-y-2 p-2 sm:p-0 rounded-lg bg-card/50">
                 <p className="text-sm text-muted-foreground">Fabricant</p>
                 <div className="flex items-center gap-1">
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium truncate">{filtre?.fabricant}</span>
+                  <span className="font-medium truncate">
+                    {filtre?.fabricant}
+                  </span>
                 </div>
               </div>
               <div className="space-y-2 p-2 sm:p-0 rounded-lg bg-card/50">
                 <p className="text-sm text-muted-foreground">Prix OEM</p>
                 <div className="flex items-center gap-1">
-                  <Euro className="h-4 w-4 text-muted-foreground" />
                   <span className="font-mono font-semibold text-lg">
-                    {filtre?.prix?.toFixed(2)} €
+                    {filtre?.prix?.toFixed(2)} DA
                   </span>
                 </div>
               </div>
               <div className="space-y-2 p-2 sm:p-0 rounded-lg bg-card/50">
                 <p className="text-sm text-muted-foreground">Stock</p>
                 <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-muted-foreground" />
                   <Badge
                     variant="outline"
                     className={getStockStatus(filtre?.stock || 0)}
@@ -453,131 +533,134 @@ export default function FilterDetails() {
         <Card className="shadow-card">
           <CardHeader>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-primary" />
-                <span>Références Équivalentes ({filteredCrossFilters.length})</span>
+              <CardTitle className="flex items-center gap-3">
+                <span>Références Équivalentes</span>
+                <span className="block  text-primary">
+                  ({filteredCrossFilters.length})
+                </span>
               </CardTitle>
-              <div className="w-full sm:w-auto">
+              <div className="w-full sm:w-auto ">
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button
                       className="w-full sm:w-auto bg-primary hover:bg-primary-hover"
-                      onClick={openDialog}
+                      onClick={() => setIsDialogOpen(true)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">Ajouter Équivalence</span>
+                      <span className="hidden sm:inline">
+                        Ajouter Équivalence
+                      </span>
+                      <span className="sm:hidden">Ajouter</span>
                     </Button>
                   </DialogTrigger>
-                <DialogContent className="max-w-md sm:max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle className="text-lg sm:text-xl">Nouvelle Référence Équivalente</DialogTitle>
-                    <DialogDescription className="text-sm">
-                      Ajoutez une référence équivalente pour ce filtre.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4 px-2 sm:px-0">
-                    <div className="space-y-2">
-                      <Label htmlFor="référence">Référence</Label>
-                      <Input
-                        id="référence"
-                        placeholder="ex: HF6177"
-                        value={newCrossReference}
-                        onChange={(e) => {
-                          setNewCrossReference(e.target.value);
-                          setCrossErrors({ ...crossErrors, reference: "" });
-                        }}
-                        className={
-                          crossErrors.reference ? "border-destructive" : ""
-                        }
-                      />
-                      {crossErrors.reference && (
-                        <p className="text-sm text-destructive">
-                          {crossErrors.reference}
-                        </p>
-                      )}
+                  <DialogContent className="max-w-md sm:max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle className="text-lg sm:text-xl">
+                        Nouvelle Référence Équivalente
+                      </DialogTitle>
+                      <DialogDescription className="text-sm">
+                        Ajoutez une référence équivalente pour ce filtre.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4 px-2 sm:px-0">
+                      <div className="space-y-2">
+                        <Label htmlFor="reference">Référence</Label>
+                        <Input
+                          id="reference"
+                          placeholder="ex: HF6177"
+                          value={newCrossReference}
+                          onChange={(e) => {
+                            setNewCrossReference(e.target.value);
+                            setCrossErrors({ ...crossErrors, reference: "" });
+                          }}
+                          className={
+                            crossErrors.reference ? "border-destructive" : ""
+                          }
+                        />
+                        {crossErrors.reference && (
+                          <p className="text-sm text-destructive">
+                            {crossErrors.reference}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="fabricant">Fabricant</Label>
+                        <Input
+                          id="fabricant"
+                          placeholder="ex: Fleetguard"
+                          value={newCrossFabricant}
+                          onChange={(e) => {
+                            setNewCrossFabricant(e.target.value);
+                            setCrossErrors({ ...crossErrors, fabricant: "" });
+                          }}
+                          className={
+                            crossErrors.fabricant ? "border-destructive" : ""
+                          }
+                        />
+                        {crossErrors.fabricant && (
+                          <p className="text-sm text-destructive">
+                            {crossErrors.fabricant}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="prix">Prix (DA)</Label>
+                        <Input
+                          id="prix"
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={newCrossPrix}
+                          onChange={(e) => {
+                            setNewCrossPrix(e.target.value);
+                            setCrossErrors({ ...crossErrors, prix: "" });
+                          }}
+                          className={
+                            crossErrors.prix ? "border-destructive" : ""
+                          }
+                        />
+                        {crossErrors.prix && (
+                          <p className="text-sm text-destructive">
+                            {crossErrors.prix}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="stock">Stock</Label>
+                        <Input
+                          id="stock"
+                          type="number"
+                          placeholder="0"
+                          value={newCrossStock}
+                          onChange={(e) => {
+                            setNewCrossStock(e.target.value);
+                            setCrossErrors({ ...crossErrors, stock: "" });
+                          }}
+                          className={
+                            crossErrors.stock ? "border-destructive" : ""
+                          }
+                        />
+                        {crossErrors.stock && (
+                          <p className="text-sm text-destructive">
+                            {crossErrors.stock}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="fabricant">Fabricant</Label>
-                      <Input
-                        id="fabricant"
-                        placeholder="ex: Fleetguard"
-                        value={newCrossFabricant}
-                        onChange={(e) => {
-                          setNewCrossFabricant(e.target.value);
-                          setCrossErrors({ ...crossErrors, fabricant: "" });
-                        }}
-                        className={
-                          crossErrors.fabricant ? "border-destructive" : ""
-                        }
-                      />
-                      {crossErrors.fabricant && (
-                        <p className="text-sm text-destructive">
-                          {crossErrors.fabricant}
-                        </p>
-                      )}
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={resetCrossForm}>
+                        Annuler
+                      </Button>
+                      <Button
+                        className="bg-primary hover:bg-primary-hover"
+                        onClick={handleAddCrossFilter}
+                      >
+                        Ajouter
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="prix">Prix (€)</Label>
-                      <Input
-                        id="prix"
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={newCrossPrix}
-                        onChange={(e) => {
-                          setNewCrossPrix(e.target.value);
-                          setCrossErrors({ ...crossErrors, prix: "" });
-                        }}
-                        className={crossErrors.prix ? "border-destructive" : ""}
-                      />
-                      {crossErrors.prix && (
-                        <p className="text-sm text-destructive">
-                          {crossErrors.prix}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="stock">Stock</Label>
-                      <Input
-                        id="stock"
-                        type="number"
-                        placeholder="0"
-                        value={newCrossStock}
-                        onChange={(e) => {
-                          setNewCrossStock(e.target.value);
-                          setCrossErrors({ ...crossErrors, stock: "" });
-                        }}
-                        className={
-                          crossErrors.stock ? "border-destructive" : ""
-                        }
-                      />
-                      {crossErrors.stock && (
-                        <p className="text-sm text-destructive">
-                          {crossErrors.stock}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        resetCrossForm();
-                        closeDialog();
-                      }}
-                    >
-                      Annuler
-                    </Button>
-                    <Button
-                      className="bg-primary hover:bg-primary-hover"
-                      onClick={handleAddCrossFilter}
-                    >
-                      Ajouter
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -587,12 +670,12 @@ export default function FilterDetails() {
                 placeholder="Rechercher par référence ou fabricant..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-md"
+                className="max-w-full sm:max-w-md"
               />
             </div>
 
-            {/* Cross Filters Table */}
-            <div className="overflow-x-auto">
+            {/* Desktop Table - Hidden on smaller screens */}
+            <div className="hidden md:block overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -600,29 +683,20 @@ export default function FilterDetails() {
                     <TableHead className="w-[25%]">Fabricant</TableHead>
                     <TableHead className="w-[15%]">Prix</TableHead>
                     <TableHead className="w-[15%]">Stock</TableHead>
-                    <TableHead className="w-[25%] text-right">Actions</TableHead>
+                    <TableHead className="w-[25%] text-right">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
-              <TableBody>
-                {filteredCrossFilters.map((cross) => {
-                  return (
+                <TableBody>
+                  {filteredCrossFilters.map((cross) => (
                     <TableRow key={cross.id}>
                       <TableCell className="font-mono font-medium">
-                        {cross.référence}
+                        {cross.reference}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Building2 className="h-3 w-3 text-muted-foreground" />
-                          {cross.fabricant}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Euro className="h-3 w-3 text-muted-foreground" />
-                          <span className="font-mono">
-                            {cross.prix.toFixed(2)} €
-                          </span>
-                        </div>
+                      <TableCell>{cross.fabricant}</TableCell>
+                      <TableCell className="font-mono">
+                        {cross.prix.toFixed(2)} DA
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -635,7 +709,7 @@ export default function FilterDetails() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Dialog
-                            open={editingCrossFilter === cross.id}
+                            open={editingCrossFilter?.id === cross.id}
                             onOpenChange={(open) => {
                               if (!open) {
                                 setEditingCrossFilter(null);
@@ -647,7 +721,7 @@ export default function FilterDetails() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setEditingCrossFilter(cross.id)}
+                                onClick={() => setEditingCrossFilter(cross)}
                               >
                                 <Edit className="h-3 w-3" />
                               </Button>
@@ -655,167 +729,10 @@ export default function FilterDetails() {
                             <DialogContent className="max-w-md sm:max-w-lg">
                               <DialogHeader>
                                 <DialogTitle className="text-lg sm:text-xl">
-                                  Modifier la référence - {cross.référence}
+                                  Modifier - {cross.reference}
                                 </DialogTitle>
                               </DialogHeader>
-                              <form
-                                className="px-2 sm:px-0"
-                                onSubmit={(e) => {
-                                  e.preventDefault();
-                                  const formData = new FormData(
-                                    e.currentTarget
-                                  );
-                                  const data = {
-                                    référence: formData.get(
-                                      "référence"
-                                    ) as string,
-                                    fabricant: formData.get(
-                                      "fabricant"
-                                    ) as string,
-                                    prix: formData.get("prix") as string,
-                                    stock: formData.get("stock") as string,
-                                  };
-                                  const errors = validateEditForm(data);
-                                  if (Object.keys(errors).length === 0) {
-                                    // Handle save logic here
-                                    setEditingCrossFilter(null);
-                                    setEditErrors({});
-                                  } else {
-                                    setEditErrors(errors);
-                                  }
-                                }}
-                              >
-                                <div className="grid gap-4 py-4 px-2 sm:px-0">
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-cross-ref">
-                                      Référence
-                                    </Label>
-                                    <Input
-                                      id="edit-cross-ref"
-                                      name="référence"
-                                      defaultValue={cross.référence}
-                                      className={
-                                        editErrors.référence
-                                          ? "border-destructive"
-                                          : ""
-                                      }
-                                      onChange={() =>
-                                        setEditErrors({
-                                          ...editErrors,
-                                          référence: "",
-                                        })
-                                      }
-                                    />
-                                    {editErrors.référence && (
-                                      <p className="text-sm text-destructive">
-                                        {editErrors.référence}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-cross-fabricant">
-                                      Fabricant
-                                    </Label>
-                                    <Input
-                                      id="edit-cross-fabricant"
-                                      name="fabricant"
-                                      defaultValue={cross.fabricant}
-                                      className={
-                                        editErrors.fabricant
-                                          ? "border-destructive"
-                                          : ""
-                                      }
-                                      onChange={() =>
-                                        setEditErrors({
-                                          ...editErrors,
-                                          fabricant: "",
-                                        })
-                                      }
-                                    />
-                                    {editErrors.fabricant && (
-                                      <p className="text-sm text-destructive">
-                                        {editErrors.fabricant}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-cross-prix">
-                                      Prix (€)
-                                    </Label>
-                                    <Input
-                                      id="edit-cross-prix"
-                                      name="prix"
-                                      type="number"
-                                      step="0.01"
-                                      defaultValue={cross.prix}
-                                      className={
-                                        editErrors.prix
-                                          ? "border-destructive"
-                                          : ""
-                                      }
-                                      onChange={() =>
-                                        setEditErrors({
-                                          ...editErrors,
-                                          prix: "",
-                                        })
-                                      }
-                                    />
-                                    {editErrors.prix && (
-                                      <p className="text-sm text-destructive">
-                                        {editErrors.prix}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-cross-stock">
-                                      Stock
-                                    </Label>
-                                    <Input
-                                      id="edit-cross-stock"
-                                      name="stock"
-                                      type="number"
-                                      defaultValue={cross.stock}
-                                      className={
-                                        editErrors.stock
-                                          ? "border-destructive"
-                                          : ""
-                                      }
-                                      onChange={() =>
-                                        setEditErrors({
-                                          ...editErrors,
-                                          stock: "",
-                                        })
-                                      }
-                                    />
-                                    {editErrors.stock && (
-                                      <p className="text-sm text-destructive">
-                                        {editErrors.stock}
-                                      </p>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:space-x-2">
-                                  <DialogClose asChild>
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      className="w-full sm:w-auto"
-                                      onClick={() => {
-                                        setEditingCrossFilter(null);
-                                        setEditErrors({});
-                                      }}
-                                    >
-                                      Annuler
-                                    </Button>
-                                  </DialogClose>
-                                  <Button
-                                    type="submit"
-                                    className="w-full sm:w-auto bg-primary hover:bg-primary-hover"
-                                  >
-                                    Sauvegarder
-                                  </Button>
-                                </div>
-                              </form>
+                              {editDialogContent(cross)}
                             </DialogContent>
                           </Dialog>
                           <Button
@@ -829,10 +746,82 @@ export default function FilterDetails() {
                         </div>
                       </TableCell>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Cards - Hidden on medium and larger screens */}
+            <div className="md:hidden space-y-4">
+              {filteredCrossFilters.map((cross) => (
+                <Card key={cross.id} className="shadow-sm">
+                  <CardHeader>
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <CardTitle className="text-base font-mono">
+                          {cross.reference}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          {cross.fabricant}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={getStockStatus(cross.stock)}
+                      >
+                        Stock: {cross.stock}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Prix</span>
+                      <span className="font-semibold font-mono">
+                        {cross.prix.toFixed(2)} DA
+                      </span>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-end gap-2">
+                    <Dialog
+                      open={editingCrossFilter?.id === cross.id}
+                      onOpenChange={(open) => {
+                        if (!open) {
+                          setEditingCrossFilter(null);
+                          setEditErrors({});
+                        }
+                      }}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => setEditingCrossFilter(cross)}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Modifier
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>
+                            Modifier - {cross.reference}
+                          </DialogTitle>
+                        </DialogHeader>
+                        {editDialogContent(cross)}
+                      </DialogContent>
+                    </Dialog>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-destructive border-destructive/20 hover:bg-destructive/10"
+                      onClick={() => handleDeleteCrossFilter(cross.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -841,14 +830,19 @@ export default function FilterDetails() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent className="max-w-md sm:max-w-auto">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg sm:text-xl">Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogTitle className="text-lg sm:text-xl">
+              Confirmer la suppression
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-sm">
               Êtes-vous sûr de vouloir supprimer cette référence équivalente ?
               Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 sm:space-x-2">
-            <AlertDialogCancel onClick={cancelDeleteCrossFilter} className="w-full sm:w-auto">
+            <AlertDialogCancel
+              onClick={cancelDeleteCrossFilter}
+              className="w-full sm:w-auto"
+            >
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction

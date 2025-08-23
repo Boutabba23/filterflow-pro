@@ -367,7 +367,7 @@ export default function Filtres() {
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="prix">Prix Unitaire (€)</Label>
+                    <Label htmlFor="prix">Prix Unitaire (DA)</Label>
                     <Input
                       id="prix"
                       type="number"
@@ -560,7 +560,7 @@ export default function Filtres() {
                         </Badge>
                       </TableCell>
                       <TableCell className="font-mono font-medium">
-                        {filtre.prixUnitaire.toFixed(2)} €
+                        {filtre.prixUnitaire.toFixed(2)} DA
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -628,7 +628,7 @@ export default function Filtres() {
                                   </div>
                                   <div className="space-y-2">
                                     <Label htmlFor="edit-prix">
-                                      Prix Unitaire (€)
+                                      Prix Unitaire (DA)
                                     </Label>
                                     <Input
                                       id="edit-prix"
@@ -727,7 +727,7 @@ export default function Filtres() {
                         <div>
                           <span className="text-muted-foreground">Prix:</span>
                           <p className="font-mono font-medium">
-                            {filtre.prixUnitaire.toFixed(2)} €
+                            {filtre.prixUnitaire.toFixed(2)} DA
                           </p>
                         </div>
                         <div>
@@ -854,7 +854,7 @@ export default function Filtres() {
                                 </div>
                                 <div className="space-y-2">
                                   <Label htmlFor="edit-prix-mobile">
-                                    Prix Unitaire (€)
+                                    Prix Unitaire (DA)
                                   </Label>
                                   <Input
                                     id="edit-prix-mobile"
