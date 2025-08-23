@@ -36,7 +36,7 @@ import {
   MapPin,
   HourglassIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertDialog,
@@ -49,6 +49,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { EnginCard } from "@/components/engins/EnginCard";
+import { supabase } from "@/lib/database";
+import { toast } from "@/components/ui/use-toast";
+import {
+  createEngin,
+  deleteEngin,
+  fetchEngins,
+  updateEngin,
+} from "@/lib/database-utils";
 
 export default function Engins() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,6 +77,16 @@ export default function Engins() {
     type: "",
     heures: 0,
   });
+  const resetForm = () => {
+    setFormData({
+      code: "",
+      désignation: "",
+      marque: "",
+      type: "",
+      heures: 0,
+    });
+    setErrors({});
+  };
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -76,29 +94,27 @@ export default function Engins() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Mock data - sera remplacé par les données Supabase
-  const [engins, setEngins] = useState([
-    {
-      id: 1,
-      code: "A03010236",
-      désignation: "BULL SUR CHENILLE",
-      marque: "Caterpillar",
-      type: "D8R",
-      heures: 2450,
-      statut: "Actif",
-      derniereMaintenancePréventive: "2024-01-15",
-    },
-    {
-      id: 2,
-      code: "A01020672",
-      désignation: "PELLE SUR CHENILLE",
-      marque: "LIBHERR",
-      type: "R944CL",
-      heures: 5450,
-      statut: "Actif",
-      derniereMaintenancePréventive: "2024-04-15",
-    },
-  ]);
-
+  const [engins, setEngins] = useState([]);
+  const [loading, setLoading] = useState(true);
+  // Fetch data on component mount
+  useEffect(() => {
+    loadEngins();
+  }, []);
+  const loadEngins = async () => {
+    try {
+      const data = await fetchEngins();
+      setEngins(data);
+    } catch (error) {
+      console.error("Error fetching engins:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les engins",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const filteredEngins = engins.filter(
     (engin) =>
       engin.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -137,25 +153,6 @@ export default function Engins() {
     setErrors({ ...errors, [id]: "" });
   };
 
-  const handleSaveEdit = () => {
-    if (currentEngin) {
-      const updatedEngins = engins.map((engin) =>
-        engin.id === currentEngin.id
-          ? {
-              ...engin,
-              code: editFormData.code,
-              désignation: editFormData.désignation,
-              marque: editFormData.marque,
-              type: editFormData.type,
-              heures: Number(editFormData.heures),
-            }
-          : engin
-      );
-      setEngins(updatedEngins);
-      setEditOpen(false);
-    }
-  };
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -179,45 +176,95 @@ export default function Engins() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleAddEngin = () => {
+  // Update handleAddEngin
+  const handleAddEngin = async () => {
     if (!validateForm()) return;
 
-    const newEngin = {
-      id: engins.length > 0 ? Math.max(...engins.map((e) => e.id)) + 1 : 1,
-      code: formData.code,
-      désignation: formData.désignation,
-      marque: formData.marque,
-      type: formData.type,
-      heures: Number(formData.heures),
-      statut: "Actif",
-      derniereMaintenancePréventive: new Date().toISOString().split("T")[0],
-    };
+    try {
+      const newEngin = await createEngin({
+        code: formData.code,
+        designation: formData.désignation,
+        marque: formData.marque,
+        type: formData.type,
+        heures: Number(formData.heures),
 
-    setEngins([...engins, newEngin]);
-    setFormData({
-      code: "",
-      désignation: "",
-      marque: "",
-      type: "",
-      heures: 0,
-    });
-    setErrors({});
-    setAddDialogOpen(false);
+        filtres: undefined,
+        derniere_maintenance_preventive: "",
+      });
+
+      setEngins((prev) => [newEngin, ...prev]);
+      resetForm();
+      toast({
+        title: "Succès",
+        description: "L'engin a été ajouté avec succès",
+      });
+    } catch (error) {
+      console.error("Error adding engin:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter l'engin",
+        variant: "destructive",
+      });
+    }
   };
 
+  // Update handleSaveEdit
+  const handleSaveEdit = async () => {
+    if (!currentEngin) return;
+
+    try {
+      const updatedEngin = await updateEngin(currentEngin.id, {
+        code: editFormData.code,
+        designation: editFormData.désignation,
+        marque: editFormData.marque,
+        type: editFormData.type,
+        heures: Number(editFormData.heures),
+      });
+
+      setEngins((prev) =>
+        prev.map((e) => (e.id === currentEngin.id ? updatedEngin : e))
+      );
+      setEditOpen(false);
+      toast({
+        title: "Succès",
+        description: "L'engin a été modifié avec succès",
+      });
+    } catch (error) {
+      console.error("Error updating engin:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier l'engin",
+        variant: "destructive",
+      });
+    }
+  };
   const handleDeleteEngin = (id: number) => {
     setEnginToDelete(id);
     setDeleteDialogOpen(true);
   };
+  // Update confirmDeleteEngin
+  const confirmDeleteEngin = async () => {
+    if (enginToDelete === null) return;
 
-  const confirmDeleteEngin = () => {
-    if (enginToDelete !== null) {
-      setEngins(engins.filter((engin) => engin.id !== enginToDelete));
+    try {
+      await deleteEngin(enginToDelete);
+
+      setEngins((prev) => prev.filter((e) => e.id !== enginToDelete));
       setEnginToDelete(null);
       setDeleteDialogOpen(false);
+      toast({
+        title: "Succès",
+        description: "L'engin a été supprimé avec succès",
+      });
+    } catch (error) {
+      console.error("Error deleting engin:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'engin",
+        variant: "destructive",
+      });
     }
   };
-
   const cancelDeleteEngin = () => {
     setEnginToDelete(null);
     setDeleteDialogOpen(false);

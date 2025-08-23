@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StatsCardProps {
   title: string;
@@ -13,6 +14,11 @@ interface StatsCardProps {
 }
 
 export function StatsCard({ title, value, icon: Icon, trend, variant = "default" }: StatsCardProps) {
+  // Vérifier si Icon est une fonction valide avant de l'utiliser comme composant
+  const isValidIcon = typeof Icon === 'function';
+
+  // Composant d'icône sécurisé
+  const SafeIcon = isValidIcon ? Icon : () => null;
   const getVariantClasses = () => {
     switch (variant) {
       case "success":
@@ -45,7 +51,7 @@ export function StatsCard({ title, value, icon: Icon, trend, variant = "default"
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
-        <Icon className={`h-4 w-4 ${getIconClasses()}`} />
+        <SafeIcon className={`h-4 w-4 ${getIconClasses()}`} />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold text-foreground">{value}</div>

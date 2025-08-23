@@ -56,6 +56,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DatabaseCrossReference,
+  DatabaseFiltre,
+  supabase,
+} from "@/lib/database";
+import { toast } from "@/components/ui/use-toast";
+import {
+  createCrossReference,
+  deleteCrossReference,
+  fetchCrossReferences,
+  fetchFiltreById,
+} from "@/lib/database-utils";
 
 export default function FilterDetails() {
   const { id } = useParams();
@@ -65,7 +77,6 @@ export default function FilterDetails() {
   const [crossFilterToDelete, setCrossFilterToDelete] = useState<number | null>(
     null
   );
-  const [crossFilters, setCrossFilters] = useState<any[]>([]);
   const [newCrossReference, setNewCrossReference] = useState("");
   const [newCrossFabricant, setNewCrossFabricant] = useState("");
   const [newCrossPrix, setNewCrossPrix] = useState("");
@@ -76,150 +87,70 @@ export default function FilterDetails() {
   );
   const [editErrors, setEditErrors] = useState<Record<string, string>>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // Mock catalogue filters – to be replaced by Supabase data
-  const catalogueFiltres = [
-    {
-      id: 1,
-      referencePrincipale: "HF6177",
-      type: "Huile",
-      fabricant: "Fleetguard",
-      prix: 38.5,
-      stock: 12,
-      delaiLivraison: "24-48h",
-      description: "Filtre à huile Fleetguard HF6177 pour moteurs industriels",
-      crossFilters: [
-        {
-          id: 1,
-          reference: "LF9009",
-          fabricant: "Fleetguard",
-          prix: 35.2,
-          stock: 5,
-        },
-        {
-          id: 2,
-          reference: "P551712",
-          fabricant: "Donaldson",
-          prix: 42.2,
-          stock: 8,
-        },
-        {
-          id: 3,
-          reference: "C23410",
-          fabricant: "Mann Filter",
-          prix: 39.5,
-          stock: 3,
-        },
-      ],
-    },
-    {
-      id: 2,
-      referencePrincipale: "P551712",
-      type: "Carburant",
-      fabricant: "Donaldson",
-      prix: 42.2,
-      stock: 8,
-      delaiLivraison: "48-72h",
-      description:
-        "Filtre à carburant Donaldson P551712 pour équipements lourds",
-      crossFilters: [
-        {
-          id: 4,
-          reference: "FF105D",
-          fabricant: "Donaldson",
-          prix: 38.9,
-          stock: 12,
-        },
-        {
-          id: 5,
-          reference: "HF6177",
-          fabricant: "Fleetguard",
-          prix: 38.5,
-          stock: 12,
-        },
-      ],
-    },
-    {
-      id: 3,
-      referencePrincipale: "WP928/80",
-      type: "Air",
-      fabricant: "Mann Filter",
-      prix: 35.9,
-      stock: 15,
-      delaiLivraison: "3-5 jours",
-      description:
-        "Filtre à air Mann Filter WP928/80 pour applications automobiles",
-      crossFilters: [
-        {
-          id: 6,
-          reference: "C30850",
-          fabricant: "Mann Filter",
-          prix: 33.2,
-          stock: 7,
-        },
-        {
-          id: 7,
-          reference: "AF25437",
-          fabricant: "Fleetguard",
-          prix: 36.8,
-          stock: 10,
-        },
-      ],
-    },
-    {
-      id: 4,
-      referencePrincipale: "OC974",
-      type: "Huile",
-      fabricant: "Mahle",
-      prix: 40.75,
-      stock: 20,
-      delaiLivraison: "24-48h",
-      description: "Filtre à huile Mahle OC974 pour moteurs diesel",
-      crossFilters: [
-        {
-          id: 8,
-          reference: "OX192D1",
-          fabricant: "Mahle",
-          prix: 38.9,
-          stock: 15,
-        },
-        {
-          id: 9,
-          reference: "HF6177",
-          fabricant: "Fleetguard",
-          prix: 38.5,
-          stock: 12,
-        },
-      ],
-    },
-  ] as const;
-
-  const filtre = useMemo(
-    () => catalogueFiltres.find((f) => f.id === Number(id)),
-    [id]
+  const [filtre, setFiltre] = useState<DatabaseFiltre | null>(null);
+  const [crossFilters, setCrossFilters] = useState<DatabaseCrossReference[]>(
+    []
   );
+  const [loading, setLoading] = useState(true);
 
+  // Fetch data on component mount and when id changes
   useEffect(() => {
-    if (filtre) {
-      setCrossFilters([...filtre.crossFilters]);
+    if (id) {
+      fetchFiltreDetails();
     }
-  }, [filtre]);
+  }, [id]);
 
+  const fetchFiltreDetails = async () => {
+    try {
+      // Fetch main filter
+      const filtreData = await fetchFiltreById(Number(id));
+      setFiltre(filtreData);
+
+      // Fetch cross references
+      const crossData = await fetchCrossReferences(Number(id));
+      setCrossFilters(crossData);
+    } catch (error) {
+      console.error("Error fetching filtre details:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les détails du filtre",
+        variant: "destructive",
+      });
+      navigate("/filtres");
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleDeleteCrossFilter = (id: number) => {
     setCrossFilterToDelete(id);
     setDeleteDialogOpen(true);
   };
 
-  const confirmDeleteCrossFilter = () => {
-    if (crossFilterToDelete !== null) {
+  // Update confirmDeleteCrossFilter
+  const confirmDeleteCrossFilter = async () => {
+    if (crossFilterToDelete === null) return;
+
+    try {
+      await deleteCrossReference(crossFilterToDelete);
+
       setCrossFilters((prev) =>
-        prev.filter((filter) => filter.id !== crossFilterToDelete)
+        prev.filter((f) => f.id !== crossFilterToDelete)
       );
       setCrossFilterToDelete(null);
       setDeleteDialogOpen(false);
+      toast({
+        title: "Succès",
+        description: "La référence croisée a été supprimée avec succès",
+      });
+    } catch (error) {
+      console.error("Error deleting cross reference:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer la référence croisée",
+        variant: "destructive",
+      });
     }
   };
-
   const cancelDeleteCrossFilter = () => {
     setCrossFilterToDelete(null);
     setDeleteDialogOpen(false);
@@ -252,22 +183,34 @@ export default function FilterDetails() {
     setCrossErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  // Update handleAddCrossFilter
+  const handleAddCrossFilter = async () => {
+    if (!validateCrossForm() || !filtre) return;
 
-  const handleAddCrossFilter = () => {
-    if (!validateCrossForm()) return;
+    try {
+      const newCrossRef = await createCrossReference({
+        filtre_id: filtre.id,
+        reference: newCrossReference.trim(),
+        fabricant: newCrossFabricant.trim(),
+        prix: Number(newCrossPrix),
+        stock: Number(newCrossStock),
+      });
 
-    const newCrossFilter = {
-      id: Date.now(),
-      reference: newCrossReference.trim(),
-      fabricant: newCrossFabricant.trim(),
-      prix: Number(newCrossPrix),
-      stock: Number(newCrossStock),
-    };
-
-    setCrossFilters((prev) => [...prev, newCrossFilter]);
-    resetCrossForm();
+      setCrossFilters((prev) => [newCrossRef, ...prev]);
+      resetCrossForm();
+      toast({
+        title: "Succès",
+        description: "La référence croisée a été ajoutée avec succès",
+      });
+    } catch (error) {
+      console.error("Error adding cross reference:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter la référence croisée",
+        variant: "destructive",
+      });
+    }
   };
-
   const resetCrossForm = () => {
     setNewCrossReference("");
     setNewCrossFabricant("");
@@ -466,7 +409,7 @@ export default function FilterDetails() {
           </Button>
           <div className="flex-1 text-center sm:text-left">
             <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-              Détails du Filtre - {filtre?.referencePrincipale || "Non trouvé"}
+              Détails du Filtre - {filtre?.reference_principale || "Non trouvé"}
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base">
               Référence OEM et équivalences
@@ -486,7 +429,7 @@ export default function FilterDetails() {
               <div className="space-y-2 p-2 sm:p-0 rounded-lg bg-card/50">
                 <p className="text-sm text-muted-foreground">Référence OEM</p>
                 <p className="font-semibold text-lg break-all">
-                  {filtre?.referencePrincipale}
+                  {filtre?.reference_principale}
                 </p>
               </div>
               <div className="space-y-2 p-2 sm:p-0 rounded-lg bg-card/50">
