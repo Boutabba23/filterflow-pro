@@ -11,13 +11,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ResponsiveTable, MobileCard, ResponsiveTableHeader, ResponsiveTableBody } from "@/components/ui/responsive-table";
-import { ResponsiveContainer, ResponsiveStack } from "@/components/ui/responsive-container";
+import {
+  ResponsiveTable,
+  MobileCard,
+  ResponsiveTableHeader,
+  ResponsiveTableBody,
+} from "@/components/ui/responsive-table";
+import {
+  ResponsiveContainer,
+  ResponsiveStack,
+} from "@/components/ui/responsive-container";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
@@ -235,16 +244,12 @@ export default function Filtres() {
     // Only close the dialog if validation passes
     setDialogOpen(false);
   };
-}
+
   return (
     <MainLayout>
       <div className="space-y-6">
         {/* Header */}
-<<<<<<< HEAD
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-=======
-        <div className="space-y-4">
->>>>>>> fcbda779b977076e3f9756f14f218234d8a4ad52
           <div>
             <h2 className="text-2xl font-bold text-foreground">
               Gestion des Filtres
@@ -253,7 +258,6 @@ export default function Filtres() {
               Gérez vos références de filtres et compatibilités
             </p>
           </div>
-<<<<<<< HEAD
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
@@ -261,7 +265,9 @@ export default function Filtres() {
                 Nouveau Filtre
               </Button>
             </DialogTrigger>
-            <DialogContent className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}>
+            <DialogContent
+              className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}
+            >
               <DialogHeader>
                 <DialogTitle>Ajouter un Nouveau Filtre</DialogTitle>
               </DialogHeader>
@@ -284,7 +290,11 @@ export default function Filtres() {
                     </p>
                   )}
                 </div>
-                <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+                <div
+                  className={`${
+                    isMobile ? "grid grid-cols-1" : "grid grid-cols-2"
+                  } gap-4`}
+                >
                   <div className="space-y-2">
                     <Label htmlFor="reference">Référence Principale</Label>
                     <Input
@@ -333,7 +343,11 @@ export default function Filtres() {
                     )}
                   </div>
                 </div>
-                <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+                <div
+                  className={`${
+                    isMobile ? "grid grid-cols-1" : "grid grid-cols-2"
+                  } gap-4`}
+                >
                   <div className="space-y-2">
                     <Label htmlFor="fabricant">Fabricant</Label>
                     <Input
@@ -389,179 +403,32 @@ export default function Filtres() {
                   )}
                 </div>
               </div>
-              <div className={`${isMobile ? "flex flex-col" : "flex"} justify-end space-x-2 ${isMobile ? "space-y-2" : ""}`}>
+              <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
                 <DialogClose asChild>
-                  <Button variant="outline" className={isMobile ? "w-full" : ""}>Annuler</Button>
+                  <Button variant="outline" className="w-full sm:w-auto">
+                    Annuler
+                  </Button>
                 </DialogClose>
                 <Button
                   className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
                   onClick={handleAddFiltre}
                 >
                   Ajouter
-=======
-          <div className="flex justify-center">
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-primary hover:bg-primary-hover">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Nouveau Filtre
->>>>>>> fcbda779b977076e3f9756f14f218234d8a4ad52
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Ajouter un Nouveau Filtre</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="designation">Désignation</Label>
-                    <Input
-                      id="designation"
-                      placeholder="ex: Filtre à huile moteur"
-                      value={newDesignation}
-                      onChange={(e) => {
-                        setNewDesignation(e.target.value);
-                        setErrors({ ...errors, designation: "" });
-                      }}
-                      className={errors.designation ? "border-destructive" : ""}
-                    />
-                    {errors.designation && (
-                      <p className="text-sm text-destructive">
-                        {errors.designation}
-                      </p>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="reference">Référence Principale</Label>
-                      <Input
-                        id="reference"
-                        placeholder="ex: HF6177"
-                        value={newReference}
-                        onChange={(e) => {
-                          setNewReference(e.target.value);
-                          setErrors({ ...errors, reference: "" });
-                        }}
-                        className={errors.reference ? "border-destructive" : ""}
-                      />
-                      {errors.reference && (
-                        <p className="text-sm text-destructive">
-                          {errors.reference}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="type">Type de Filtre</Label>
-                      <Select
-                        value={newType}
-                        onValueChange={(value) => {
-                          setNewType(value);
-                          setErrors({ ...errors, type: "" });
-                        }}
-                      >
-                        <SelectTrigger
-                          className={errors.type ? "border-destructive" : ""}
-                        >
-                          <SelectValue placeholder="Sélectionner le type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="hydraulique">Hydraulique</SelectItem>
-                          <SelectItem value="air">Air</SelectItem>
-                          <SelectItem value="carburant">Carburant</SelectItem>
-                          <SelectItem value="huile">Huile</SelectItem>
-                          <SelectItem value="transmission">
-                            Transmission
-                          </SelectItem>
-                          <SelectItem value="cabine">Cabine</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors.type && (
-                        <p className="text-sm text-destructive">{errors.type}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="fabricant">Fabricant</Label>
-                      <Input
-                        id="fabricant"
-                        placeholder="ex: Caterpillar, Fleetguard..."
-                        value={newFabricant}
-                        onChange={(e) => {
-                          setNewFabricant(e.target.value);
-                          setErrors({ ...errors, fabricant: "" });
-                        }}
-                        className={errors.fabricant ? "border-destructive" : ""}
-                      />
-                      {errors.fabricant && (
-                        <p className="text-sm text-destructive">
-                          {errors.fabricant}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="prix">Prix Unitaire (€)</Label>
-                      <Input
-                        id="prix"
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={newPrix}
-                        onChange={(e) => {
-                          setNewPrix(e.target.value);
-                          setErrors({ ...errors, prix: "" });
-                        }}
-                        className={errors.prix ? "border-destructive" : ""}
-                      />
-                      {errors.prix && (
-                        <p className="text-sm text-destructive">{errors.prix}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="stock">Stock Initial</Label>
-                    <Input
-                      id="stock"
-                      type="number"
-                      placeholder="0"
-                      value={newStock}
-                      onChange={(e) => {
-                        setNewStock(e.target.value);
-                        setErrors({ ...errors, stock: "" });
-                      }}
-                      className={errors.stock ? "border-destructive" : ""}
-                    />
-                    {errors.stock && (
-                      <p className="text-sm text-destructive">{errors.stock}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <DialogClose asChild>
-                    <Button variant="outline">Annuler</Button>
-                  </DialogClose>
-                  <Button
-                    className="bg-primary hover:bg-primary-hover"
-                    onClick={handleAddFiltre}
-                  >
-                    Ajouter
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Search and Filters */}
         <Card className="shadow-card">
           <CardContent className="pt-6">
-<<<<<<< HEAD
-            <div className={`${isMobile ? "flex flex-col space-y-4" : "flex items-center"} gap-4`}>
+            <div
+              className={`${
+                isMobile ? "flex flex-col space-y-4" : "flex items-center"
+              } gap-4`}
+            >
               <div className={`${isMobile ? "w-full" : "flex-1"} relative`}>
-=======
-            <ResponsiveStack direction="horizontal-mobile" spacing="md">
-              <div className="flex-1 relative">
->>>>>>> fcbda779b977076e3f9756f14f218234d8a4ad52
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Rechercher par référence, type, fabricant..."
@@ -571,11 +438,7 @@ export default function Filtres() {
                 />
               </div>
               <Select>
-<<<<<<< HEAD
                 <SelectTrigger className={`${isMobile ? "w-full" : "w-48"}`}>
-=======
-                <SelectTrigger className="w-full sm:w-48">
->>>>>>> fcbda779b977076e3f9756f14f218234d8a4ad52
                   <SelectValue placeholder="Filtrer par type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -586,7 +449,7 @@ export default function Filtres() {
                   <SelectItem value="huile">Huile</SelectItem>
                 </SelectContent>
               </Select>
-            </ResponsiveStack>
+            </div>
           </CardContent>
         </Card>
 
@@ -785,11 +648,11 @@ export default function Filtres() {
                                     />
                                   </div>
                                   <div className="space-y-2">
-                                    <Label htmlFor="edit-delai">
+                                    <Label htmlFor="edit-engins">
                                       Engins Compatibles
                                     </Label>
                                     <Input
-                                      id="edit-delai"
+                                      id="edit-engins"
                                       type="number"
                                       defaultValue={filtre.enginCompatibles}
                                     />
@@ -805,12 +668,14 @@ export default function Filtres() {
                                   />
                                 </div>
                               </div>
-                              <div className="flex justify-end space-x-2">
-                                <Button variant="outline">Annuler</Button>
+                              <DialogFooter>
+                                <DialogClose asChild>
+                                  <Button variant="outline">Annuler</Button>
+                                </DialogClose>
                                 <Button className="bg-primary hover:bg-primary-hover">
                                   Sauvegarder
                                 </Button>
-                              </div>
+                              </DialogFooter>
                             </DialogContent>
                           </Dialog>
                           <Button
@@ -832,114 +697,116 @@ export default function Filtres() {
             {/* Mobile Cards */}
             <div className="md:hidden space-y-4">
               {filteredFiltres.map((filtre) => (
-                <MobileCard key={filtre.id}>
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <Link
-                          to={`/filtres/${filtre.id}`}
-                          className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium font-mono text-lg"
-                        >
-                          {filtre.referencePrincipale}
-                        </Link>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {filtre.description}
-                        </p>
-                      </div>
-                      <Badge className={getTypeColor(filtre.type)}>
-                        {filtre.type}
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Fabricant:</span>
-                        <p className="font-medium">{filtre.fabricant}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Prix:</span>
-                        <p className="font-mono font-medium">
-                          {filtre.prixUnitaire.toFixed(2)} €
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Stock:</span>
-                        <Badge className={getStockStatus(filtre.stock)}>
-                          {filtre.stock} unités
+                <Card key={filtre.id} className="shadow-card">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <Link
+                            to={`/filtres/${filtre.id}`}
+                            className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium font-mono text-lg"
+                          >
+                            {filtre.referencePrincipale}
+                          </Link>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {filtre.description}
+                          </p>
+                        </div>
+                        <Badge className={getTypeColor(filtre.type)}>
+                          {filtre.type}
                         </Badge>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Engins:</span>
-                        <p className="flex items-center gap-1">
-                          <Package className="h-3 w-3" />
-                          {filtre.enginCompatibles}
-                        </p>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
-                      <div className="flex items-center gap-2">
-                        <LinkIcon className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-sm font-mono">
-                          {filtre.referencesCompatibles.length} réf.
-                        </span>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-6 px-2 text-xs"
-                            >
-                              Voir
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>
-                                Références Compatibles -{" "}
-                                {filtre.referencePrincipale}
-                              </DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-2">
-                              {filtre.referencesCompatibles.map(
-                                (ref, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex items-center justify-between p-2 bg-muted/20 rounded"
-                                  >
-                                    <span className="font-mono">{ref}</span>
-                                    {index === 0 && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs"
-                                      >
-                                        Principal
-                                      </Badge>
-                                    )}
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">
+                            Fabricant:
+                          </span>
+                          <p className="font-medium">{filtre.fabricant}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Prix:</span>
+                          <p className="font-mono font-medium">
+                            {filtre.prixUnitaire.toFixed(2)} €
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Stock:</span>
+                          <Badge className={getStockStatus(filtre.stock)}>
+                            {filtre.stock} unités
+                          </Badge>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Engins:</span>
+                          <p className="flex items-center gap-1">
+                            <Package className="h-3 w-3" />
+                            {filtre.enginCompatibles}
+                          </p>
+                        </div>
                       </div>
-                      
-                      <div className="flex gap-1">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>
-                                Modifier le filtre -{" "}
-                                {filtre.referencePrincipale}
-                              </DialogTitle>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                              <div className="grid gap-4">
+
+                      <div className="flex items-center justify-between pt-2 border-t border-border">
+                        <div className="flex items-center gap-2">
+                          <LinkIcon className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-sm font-mono">
+                            {filtre.referencesCompatibles.length} réf.
+                          </span>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-6 px-2 text-xs"
+                              >
+                                Voir
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>
+                                  Références Compatibles -{" "}
+                                  {filtre.referencePrincipale}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-2">
+                                {filtre.referencesCompatibles.map(
+                                  (ref, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center justify-between p-2 bg-muted/20 rounded"
+                                    >
+                                      <span className="font-mono">{ref}</span>
+                                      {index === 0 && (
+                                        <Badge
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          Principal
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+
+                        <div className="flex gap-1">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="w-[95%] max-w-none">
+                              <DialogHeader>
+                                <DialogTitle>
+                                  Modifier le filtre -{" "}
+                                  {filtre.referencePrincipale}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="grid gap-4 py-4">
                                 <div className="space-y-2">
                                   <Label htmlFor="edit-ref-mobile">
                                     Référence Principale
@@ -997,7 +864,9 @@ export default function Filtres() {
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-stock-mobile">Stock</Label>
+                                  <Label htmlFor="edit-stock-mobile">
+                                    Stock
+                                  </Label>
                                   <Input
                                     id="edit-stock-mobile"
                                     type="number"
@@ -1005,11 +874,11 @@ export default function Filtres() {
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-delai-mobile">
+                                  <Label htmlFor="edit-engins-mobile">
                                     Engins Compatibles
                                   </Label>
                                   <Input
-                                    id="edit-delai-mobile"
+                                    id="edit-engins-mobile"
                                     type="number"
                                     defaultValue={filtre.enginCompatibles}
                                   />
@@ -1024,27 +893,34 @@ export default function Filtres() {
                                   />
                                 </div>
                               </div>
-                            </div>
-                            <div className="flex flex-col sm:flex-row justify-end gap-2">
-                              <Button variant="outline" className="w-full sm:w-auto">Annuler</Button>
-                              <Button className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
-                                Sauvegarder
-                              </Button>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-destructive border-destructive/20 hover:bg-destructive/10"
-                          onClick={() => handleDeleteFiltre(filtre.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                              <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                                <DialogClose asChild>
+                                  <Button
+                                    variant="outline"
+                                    className="w-full sm:w-auto"
+                                  >
+                                    Annuler
+                                  </Button>
+                                </DialogClose>
+                                <Button className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
+                                  Sauvegarder
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive border-destructive/20 hover:bg-destructive/10"
+                            onClick={() => handleDeleteFiltre(filtre.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </MobileCard>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </CardContent>
