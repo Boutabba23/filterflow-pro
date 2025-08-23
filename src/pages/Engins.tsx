@@ -48,6 +48,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { EnginCard } from "@/components/engins/EnginCard";
 
 export default function Engins() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -239,23 +240,24 @@ export default function Engins() {
     <MainLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">
               Gestion des Engins
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground">
               Gérez votre parc d'engins de chantier
             </p>
           </div>
           <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
               <Button
-                className="bg-primary hover:bg-primary-hover"
+                className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
                 onClick={() => setAddDialogOpen(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Nouvel Engin
+                <span className="hidden sm:inline">Nouvel Engin</span>
+                <span className="sm:hidden">Ajouter</span>
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
@@ -357,7 +359,7 @@ export default function Engins() {
         {/* Search and Filters */}
         <Card className="shadow-card">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -368,7 +370,7 @@ export default function Engins() {
                 />
               </div>
               <Select>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="Filtrer par statut" />
                 </SelectTrigger>
                 <SelectContent>
@@ -382,7 +384,7 @@ export default function Engins() {
           </CardContent>
         </Card>
 
-        {/* Engins Table */}
+        {/* Engins List */}
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -391,170 +393,173 @@ export default function Engins() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Désignation</TableHead>
-                  <TableHead>Marque</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Heures</TableHead>
-                  <TableHead>Dernière Maintenance</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredEngins.map((engin) => (
-                  <TableRow key={engin.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Link
-                          to={`/engins/${engin.id}`}
-                          className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium"
-                        >
-                          {engin.code}
-                        </Link>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {engin.désignation}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {engin.marque}
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="border-primary/20 text-primary"
-                      >
-                        {engin.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-mono">
-                      <div className="flex items-center gap-1">
-                        <HourglassIcon className="h-3 w-3 text-muted-foreground" />
-                        {engin.heures.toLocaleString()}h
-                      </div>
-                    </TableCell>
-
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-muted-foreground" />
-                        {new Date(
-                          engin.derniereMaintenancePréventive
-                        ).toLocaleDateString("fr-FR")}
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Dialog
-                          open={currentEngin?.id === engin.id && editOpen}
-                          onOpenChange={(open) => !open && setEditOpen(false)}
-                        >
-                          <DialogTrigger asChild>
+            {/* Desktop Table */}
+            <div className="hidden lg:block">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Désignation</TableHead>
+                      <TableHead>Marque</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Heures</TableHead>
+                      <TableHead>Dernière Maintenance</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredEngins.map((engin) => (
+                      <TableRow key={engin.id}>
+                        <TableCell>
+                          <Link
+                            to={`/engins/${engin.id}`}
+                            className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium"
+                          >
+                            {engin.code}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{engin.désignation}</TableCell>
+                        <TableCell>{engin.marque}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className="border-primary/20 text-primary"
+                          >
+                            {engin.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-mono">
+                          <div className="flex items-center gap-1">
+                            <HourglassIcon className="h-3 w-3 text-muted-foreground" />
+                            {engin.heures.toLocaleString()}h
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3 text-muted-foreground" />
+                            {new Date(
+                              engin.derniereMaintenancePréventive
+                            ).toLocaleDateString("fr-FR")}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Dialog
+                              open={currentEngin?.id === engin.id && editOpen}
+                              onOpenChange={(open) => !open && setEditOpen(false)}
+                            >
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditClick(engin)}
+                                >
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    Modifier l'engin - {currentEngin?.code}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-code">Code Engin</Label>
+                                      <Input
+                                        id="edit-code"
+                                        value={editFormData.code}
+                                        onChange={handleEditInputChange}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-désignation">
+                                        Désignation
+                                      </Label>
+                                      <Input
+                                        id="edit-désignation"
+                                        value={editFormData.désignation}
+                                        onChange={handleEditInputChange}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-marque">Marque</Label>
+                                      <Input
+                                        id="edit-marque"
+                                        value={editFormData.marque}
+                                        onChange={handleEditInputChange}
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label htmlFor="edit-type">Type</Label>
+                                      <Input
+                                        id="edit-type"
+                                        value={editFormData.type}
+                                        onChange={handleEditInputChange}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-heures">
+                                      Heures de Service
+                                    </Label>
+                                    <Input
+                                      id="edit-heures"
+                                      type="number"
+                                      value={editFormData.heures}
+                                      onChange={handleEditInputChange}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row justify-end gap-2">
+                                  <Button
+                                    variant="outline"
+                                    className="w-full sm:w-auto"
+                                    onClick={() => setEditOpen(false)}
+                                  >
+                                    Annuler
+                                  </Button>
+                                  <Button
+                                    className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
+                                    onClick={handleSaveEdit}
+                                  >
+                                    Sauvegarder
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleEditClick(engin)}
+                              className="text-destructive border-destructive/20 hover:bg-destructive/10"
+                              onClick={() => handleDeleteEngin(engin.id)}
                             >
-                              <Edit className="h-3 w-3" />
+                              <Trash2 className="h-3 w-3" />
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>
-                                Modifier l'engin - {currentEngin?.code}
-                              </DialogTitle>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-code">Code Engin</Label>
-                                  <Input
-                                    id="edit-code"
-                                    value={editFormData.code}
-                                    onChange={handleEditInputChange}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-désignation">
-                                    Désignation
-                                  </Label>
-                                  <Input
-                                    id="edit-désignation"
-                                    value={editFormData.désignation}
-                                    onChange={handleEditInputChange}
-                                  />
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-marque">Marque</Label>
-                                  <Input
-                                    id="edit-marque"
-                                    value={editFormData.marque}
-                                    onChange={handleEditInputChange}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-type">Type</Label>
-                                  <Input
-                                    id="edit-type"
-                                    value={editFormData.type}
-                                    onChange={handleEditInputChange}
-                                  />
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-1 gap-4">
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-heures">
-                                    Heures de Service
-                                  </Label>
-                                  <Input
-                                    id="edit-heures"
-                                    type="number"
-                                    value={editFormData.heures}
-                                    onChange={handleEditInputChange}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex justify-end space-x-2">
-                              <Button
-                                variant="outline"
-                                onClick={() => setEditOpen(false)}
-                              >
-                                Annuler
-                              </Button>
-                              <Button
-                                className="bg-primary hover:bg-primary-hover"
-                                onClick={handleSaveEdit}
-                              >
-                                Sauvegarder
-                              </Button>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-destructive border-destructive/20 hover:bg-destructive/10"
-                          onClick={() => handleDeleteEngin(engin.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="lg:hidden space-y-4">
+              {filteredEngins.map((engin) => (
+                <EnginCard
+                  key={engin.id}
+                  engin={engin}
+                  onEdit={handleEditClick}
+                  onDelete={handleDeleteEngin}
+                />
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

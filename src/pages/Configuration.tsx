@@ -14,23 +14,24 @@ export default function Configuration() {
     <MainLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Configuration Système</h2>
-            <p className="text-muted-foreground">Paramètres et préférences de l'application</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Configuration Système</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">Paramètres et préférences de l'application</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" className="w-full sm:w-auto">
               <RotateCcw className="h-4 w-4 mr-2" />
-              Réinitialiser
+              <span className="hidden sm:inline">Réinitialiser</span>
+              <span className="sm:hidden">Reset</span>
             </Button>
-            <Button className="bg-primary hover:bg-primary-hover">
+            <Button className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
               Sauvegarder
             </Button>
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2">
           {/* User Settings */}
           <Card className="shadow-card">
             <CardHeader>

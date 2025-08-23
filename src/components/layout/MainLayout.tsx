@@ -36,8 +36,10 @@ export function MainLayout({ children }: MainLayoutProps) {
             </div>
           </div>
         </header>
-        <main className="flex-1 p-2 sm:p-6 pt-16 sm:pt-22 bg-background">
-          {children}
+        <main className="flex-1 p-3 sm:p-4 md:p-6 bg-background min-h-screen">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </SidebarInset>
     </SidebarProvider>

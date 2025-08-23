@@ -42,7 +42,7 @@ export function AppSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar className="border-r bg-secondary/50 backdrop-blur-sm">
+    <Sidebar className="border-r bg-secondary/50 backdrop-blur-sm" collapsible="icon">
       <SidebarContent className="bg-secondary/90 p-1">
         <SidebarGroup>
           <SidebarGroupLabel className="text-secondary-foreground/70 font-semibold text-base sm:text-lg px-2 py-1">

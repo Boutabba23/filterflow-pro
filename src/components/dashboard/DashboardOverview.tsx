@@ -52,35 +52,36 @@ export function DashboardOverview() {
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Tableau de Bord</h2>
-          <p className="text-muted-foreground">Vue d'ensemble de votre parc d'engins et filtres</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Tableau de Bord</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Vue d'ensemble de votre parc d'engins et filtres</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Rechercher..." className="w-64" />
+            <Input placeholder="Rechercher..." className="w-full sm:w-64" />
           </div>
           <Button 
-            className="bg-primary hover:bg-primary-hover"
+            className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
             onClick={() => handleNavigation('/engins', 'Redirection vers la gestion des engins')}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Nouvel engin
+            <span className="hidden sm:inline">Nouvel engin</span>
+            <span className="sm:hidden">Ajouter</span>
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatsCard key={stat.title} {...stat} />
         ))}
       </div>
 
       {/* Content Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Recent Activity */}
         <Card className="shadow-card lg:col-span-2">
           <CardHeader>
