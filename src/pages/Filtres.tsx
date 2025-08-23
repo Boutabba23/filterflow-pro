@@ -11,6 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ResponsiveTable, MobileCard, ResponsiveTableHeader, ResponsiveTableBody } from "@/components/ui/responsive-table";
+import { ResponsiveContainer, ResponsiveStack } from "@/components/ui/responsive-container";
 import {
   Dialog,
   DialogContent,
@@ -233,12 +235,16 @@ export default function Filtres() {
     // Only close the dialog if validation passes
     setDialogOpen(false);
   };
-
+}
   return (
     <MainLayout>
       <div className="space-y-6">
         {/* Header */}
+<<<<<<< HEAD
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+=======
+        <div className="space-y-4">
+>>>>>>> fcbda779b977076e3f9756f14f218234d8a4ad52
           <div>
             <h2 className="text-2xl font-bold text-foreground">
               Gestion des Filtres
@@ -247,6 +253,7 @@ export default function Filtres() {
               Gérez vos références de filtres et compatibilités
             </p>
           </div>
+<<<<<<< HEAD
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
@@ -391,17 +398,170 @@ export default function Filtres() {
                   onClick={handleAddFiltre}
                 >
                   Ajouter
+=======
+          <div className="flex justify-center">
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary-hover">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau Filtre
+>>>>>>> fcbda779b977076e3f9756f14f218234d8a4ad52
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Ajouter un Nouveau Filtre</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="designation">Désignation</Label>
+                    <Input
+                      id="designation"
+                      placeholder="ex: Filtre à huile moteur"
+                      value={newDesignation}
+                      onChange={(e) => {
+                        setNewDesignation(e.target.value);
+                        setErrors({ ...errors, designation: "" });
+                      }}
+                      className={errors.designation ? "border-destructive" : ""}
+                    />
+                    {errors.designation && (
+                      <p className="text-sm text-destructive">
+                        {errors.designation}
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reference">Référence Principale</Label>
+                      <Input
+                        id="reference"
+                        placeholder="ex: HF6177"
+                        value={newReference}
+                        onChange={(e) => {
+                          setNewReference(e.target.value);
+                          setErrors({ ...errors, reference: "" });
+                        }}
+                        className={errors.reference ? "border-destructive" : ""}
+                      />
+                      {errors.reference && (
+                        <p className="text-sm text-destructive">
+                          {errors.reference}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="type">Type de Filtre</Label>
+                      <Select
+                        value={newType}
+                        onValueChange={(value) => {
+                          setNewType(value);
+                          setErrors({ ...errors, type: "" });
+                        }}
+                      >
+                        <SelectTrigger
+                          className={errors.type ? "border-destructive" : ""}
+                        >
+                          <SelectValue placeholder="Sélectionner le type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hydraulique">Hydraulique</SelectItem>
+                          <SelectItem value="air">Air</SelectItem>
+                          <SelectItem value="carburant">Carburant</SelectItem>
+                          <SelectItem value="huile">Huile</SelectItem>
+                          <SelectItem value="transmission">
+                            Transmission
+                          </SelectItem>
+                          <SelectItem value="cabine">Cabine</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.type && (
+                        <p className="text-sm text-destructive">{errors.type}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fabricant">Fabricant</Label>
+                      <Input
+                        id="fabricant"
+                        placeholder="ex: Caterpillar, Fleetguard..."
+                        value={newFabricant}
+                        onChange={(e) => {
+                          setNewFabricant(e.target.value);
+                          setErrors({ ...errors, fabricant: "" });
+                        }}
+                        className={errors.fabricant ? "border-destructive" : ""}
+                      />
+                      {errors.fabricant && (
+                        <p className="text-sm text-destructive">
+                          {errors.fabricant}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="prix">Prix Unitaire (€)</Label>
+                      <Input
+                        id="prix"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={newPrix}
+                        onChange={(e) => {
+                          setNewPrix(e.target.value);
+                          setErrors({ ...errors, prix: "" });
+                        }}
+                        className={errors.prix ? "border-destructive" : ""}
+                      />
+                      {errors.prix && (
+                        <p className="text-sm text-destructive">{errors.prix}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="stock">Stock Initial</Label>
+                    <Input
+                      id="stock"
+                      type="number"
+                      placeholder="0"
+                      value={newStock}
+                      onChange={(e) => {
+                        setNewStock(e.target.value);
+                        setErrors({ ...errors, stock: "" });
+                      }}
+                      className={errors.stock ? "border-destructive" : ""}
+                    />
+                    {errors.stock && (
+                      <p className="text-sm text-destructive">{errors.stock}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <DialogClose asChild>
+                    <Button variant="outline">Annuler</Button>
+                  </DialogClose>
+                  <Button
+                    className="bg-primary hover:bg-primary-hover"
+                    onClick={handleAddFiltre}
+                  >
+                    Ajouter
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Search and Filters */}
         <Card className="shadow-card">
           <CardContent className="pt-6">
+<<<<<<< HEAD
             <div className={`${isMobile ? "flex flex-col space-y-4" : "flex items-center"} gap-4`}>
               <div className={`${isMobile ? "w-full" : "flex-1"} relative`}>
+=======
+            <ResponsiveStack direction="horizontal-mobile" spacing="md">
+              <div className="flex-1 relative">
+>>>>>>> fcbda779b977076e3f9756f14f218234d8a4ad52
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Rechercher par référence, type, fabricant..."
@@ -411,7 +571,11 @@ export default function Filtres() {
                 />
               </div>
               <Select>
+<<<<<<< HEAD
                 <SelectTrigger className={`${isMobile ? "w-full" : "w-48"}`}>
+=======
+                <SelectTrigger className="w-full sm:w-48">
+>>>>>>> fcbda779b977076e3f9756f14f218234d8a4ad52
                   <SelectValue placeholder="Filtrer par type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -422,7 +586,7 @@ export default function Filtres() {
                   <SelectItem value="huile">Huile</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </ResponsiveStack>
           </CardContent>
         </Card>
 
@@ -435,55 +599,296 @@ export default function Filtres() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Référence</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Fabricant</TableHead>
-                  <TableHead>Compatibilités</TableHead>
-                  <TableHead>Engins</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Prix</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredFiltres.map((filtre) => (
-                  <TableRow key={filtre.id}>
-                    <TableCell>
-                      <div>
+            {/* Desktop Table */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Référence</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Fabricant</TableHead>
+                    <TableHead>Compatibilités</TableHead>
+                    <TableHead>Engins</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Prix</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredFiltres.map((filtre) => (
+                    <TableRow key={filtre.id}>
+                      <TableCell>
+                        <div>
+                          <Link
+                            to={`/filtres/${filtre.id}`}
+                            className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium font-mono"
+                          >
+                            {filtre.referencePrincipale}
+                          </Link>
+                          <div className="text-sm text-muted-foreground max-w-48 truncate">
+                            {filtre.description}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getTypeColor(filtre.type)}>
+                          {filtre.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-foreground">
+                        {filtre.fabricant}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <LinkIcon className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-sm font-mono">
+                            {filtre.referencesCompatibles.length} ref.
+                          </span>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-5 px-2 text-xs"
+                              >
+                                Voir
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>
+                                  Références Compatibles -{" "}
+                                  {filtre.referencePrincipale}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-2">
+                                {filtre.referencesCompatibles.map(
+                                  (ref, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center justify-between p-2 bg-muted/20 rounded"
+                                    >
+                                      <span className="font-mono">{ref}</span>
+                                      {index === 0 && (
+                                        <Badge
+                                          variant="outline"
+                                          className="text-xs"
+                                        >
+                                          Principal
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Package className="h-3 w-3 text-muted-foreground" />
+                          {filtre.enginCompatibles}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStockStatus(filtre.stock)}>
+                          {filtre.stock} unités
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono font-medium">
+                        {filtre.prixUnitaire.toFixed(2)} €
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>
+                                  Modifier le filtre -{" "}
+                                  {filtre.referencePrincipale}
+                                </DialogTitle>
+                              </DialogHeader>
+                              <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-ref">
+                                      Référence Principale
+                                    </Label>
+                                    <Input
+                                      id="edit-ref"
+                                      defaultValue={filtre.referencePrincipale}
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-type">Type</Label>
+                                    <Select
+                                      defaultValue={filtre.type
+                                        .toLowerCase()
+                                        .replace(" ", "-")}
+                                    >
+                                      <SelectTrigger>
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="huile-moteur">
+                                          Huile moteur
+                                        </SelectItem>
+                                        <SelectItem value="carburant">
+                                          Carburant
+                                        </SelectItem>
+                                        <SelectItem value="air">Air</SelectItem>
+                                        <SelectItem value="hydraulique">
+                                          Hydraulique
+                                        </SelectItem>
+                                        <SelectItem value="transmission">
+                                          Transmission
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-fabricant">
+                                      Fabricant
+                                    </Label>
+                                    <Input
+                                      id="edit-fabricant"
+                                      defaultValue={filtre.fabricant}
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-prix">
+                                      Prix Unitaire (€)
+                                    </Label>
+                                    <Input
+                                      id="edit-prix"
+                                      type="number"
+                                      step="0.01"
+                                      defaultValue={filtre.prixUnitaire}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-stock">Stock</Label>
+                                    <Input
+                                      id="edit-stock"
+                                      type="number"
+                                      defaultValue={filtre.stock}
+                                    />
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label htmlFor="edit-delai">
+                                      Engins Compatibles
+                                    </Label>
+                                    <Input
+                                      id="edit-delai"
+                                      type="number"
+                                      defaultValue={filtre.enginCompatibles}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-description">
+                                    Description
+                                  </Label>
+                                  <Input
+                                    id="edit-description"
+                                    defaultValue={filtre.description}
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex justify-end space-x-2">
+                                <Button variant="outline">Annuler</Button>
+                                <Button className="bg-primary hover:bg-primary-hover">
+                                  Sauvegarder
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive border-destructive/20 hover:bg-destructive/10"
+                            onClick={() => handleDeleteFiltre(filtre.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-4">
+              {filteredFiltres.map((filtre) => (
+                <MobileCard key={filtre.id}>
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
                         <Link
                           to={`/filtres/${filtre.id}`}
-                          className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium font-mono"
+                          className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium font-mono text-lg"
                         >
                           {filtre.referencePrincipale}
                         </Link>
-                        <div className="text-sm text-muted-foreground max-w-48 truncate">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {filtre.description}
-                        </div>
+                        </p>
                       </div>
-                    </TableCell>
-                    <TableCell>
                       <Badge className={getTypeColor(filtre.type)}>
                         {filtre.type}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-foreground">
-                      {filtre.fabricant}
-                    </TableCell>
-                    <TableCell>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Fabricant:</span>
+                        <p className="font-medium">{filtre.fabricant}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Prix:</span>
+                        <p className="font-mono font-medium">
+                          {filtre.prixUnitaire.toFixed(2)} €
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Stock:</span>
+                        <Badge className={getStockStatus(filtre.stock)}>
+                          {filtre.stock} unités
+                        </Badge>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Engins:</span>
+                        <p className="flex items-center gap-1">
+                          <Package className="h-3 w-3" />
+                          {filtre.enginCompatibles}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
                       <div className="flex items-center gap-2">
                         <LinkIcon className="h-3 w-3 text-muted-foreground" />
                         <span className="text-sm font-mono">
-                          {filtre.referencesCompatibles.length} ref.
+                          {filtre.referencesCompatibles.length} réf.
                         </span>
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-5 px-2 text-xs"
+                              className="h-6 px-2 text-xs"
                             >
                               Voir
                             </Button>
@@ -518,23 +923,8 @@ export default function Filtres() {
                           </DialogContent>
                         </Dialog>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Package className="h-3 w-3 text-muted-foreground" />
-                        {filtre.enginCompatibles}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStockStatus(filtre.stock)}>
-                        {filtre.stock} unités
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-mono font-medium">
-                      {filtre.prixUnitaire.toFixed(2)} €
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                      
+                      <div className="flex gap-1">
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm">
@@ -549,18 +939,18 @@ export default function Filtres() {
                               </DialogTitle>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
-                              <div className="grid grid-cols-2 gap-4">
+                              <div className="grid gap-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-ref">
+                                  <Label htmlFor="edit-ref-mobile">
                                     Référence Principale
                                   </Label>
                                   <Input
-                                    id="edit-ref"
+                                    id="edit-ref-mobile"
                                     defaultValue={filtre.referencePrincipale}
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-type">Type</Label>
+                                  <Label htmlFor="edit-type-mobile">Type</Label>
                                   <Select
                                     defaultValue={filtre.type
                                       .toLowerCase()
@@ -586,62 +976,58 @@ export default function Filtres() {
                                     </SelectContent>
                                   </Select>
                                 </div>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-fabricant">
+                                  <Label htmlFor="edit-fabricant-mobile">
                                     Fabricant
                                   </Label>
                                   <Input
-                                    id="edit-fabricant"
+                                    id="edit-fabricant-mobile"
                                     defaultValue={filtre.fabricant}
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-prix">
+                                  <Label htmlFor="edit-prix-mobile">
                                     Prix Unitaire (€)
                                   </Label>
                                   <Input
-                                    id="edit-prix"
+                                    id="edit-prix-mobile"
                                     type="number"
                                     step="0.01"
                                     defaultValue={filtre.prixUnitaire}
                                   />
                                 </div>
-                              </div>
-                              <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-stock">Stock</Label>
+                                  <Label htmlFor="edit-stock-mobile">Stock</Label>
                                   <Input
-                                    id="edit-stock"
+                                    id="edit-stock-mobile"
                                     type="number"
                                     defaultValue={filtre.stock}
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-delai">
+                                  <Label htmlFor="edit-delai-mobile">
                                     Engins Compatibles
                                   </Label>
                                   <Input
-                                    id="edit-delai"
+                                    id="edit-delai-mobile"
                                     type="number"
                                     defaultValue={filtre.enginCompatibles}
                                   />
                                 </div>
-                              </div>
-                              <div className="space-y-2">
-                                <Label htmlFor="edit-description">
-                                  Description
-                                </Label>
-                                <Input
-                                  id="edit-description"
-                                  defaultValue={filtre.description}
-                                />
+                                <div className="space-y-2">
+                                  <Label htmlFor="edit-description-mobile">
+                                    Description
+                                  </Label>
+                                  <Input
+                                    id="edit-description-mobile"
+                                    defaultValue={filtre.description}
+                                  />
+                                </div>
                               </div>
                             </div>
-                            <div className="flex justify-end space-x-2">
-                              <Button variant="outline">Annuler</Button>
-                              <Button className="bg-primary hover:bg-primary-hover">
+                            <div className="flex flex-col sm:flex-row justify-end gap-2">
+                              <Button variant="outline" className="w-full sm:w-auto">Annuler</Button>
+                              <Button className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
                                 Sauvegarder
                               </Button>
                             </div>
@@ -656,11 +1042,11 @@ export default function Filtres() {
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                  </div>
+                </MobileCard>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
