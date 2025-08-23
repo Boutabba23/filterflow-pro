@@ -48,7 +48,8 @@ All colors MUST be HSL.
     --destructive-foreground: 0 0% 100%;
 
     --border: 210 15% 88%;
-    --input: 210 15% 88%;
+    --input: 210 20% 88%;
+    --input-background:#f9fafb;
     --ring: 210 84% 28%;
 
     /* Industrial gradients */

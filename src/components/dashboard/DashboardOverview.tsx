@@ -35,13 +35,6 @@ export function DashboardOverview() {
       variant: "success" as const,
     },
     {
-      title: "Compatibilités",
-      value: "1,247",
-      icon: Link2,
-      trend: { value: "+89 mappées", isPositive: true },
-      variant: "accent" as const,
-    },
-    {
       title: "Alertes Stock",
       value: "8",
       icon: AlertTriangle,
@@ -53,7 +46,6 @@ export function DashboardOverview() {
   const recentActivities = [
     { type: "Ajout", item: "Pelle CAT 320D", time: "Il y a 2h" },
     { type: "Modification", item: "Filtre hydraulique HF6177", time: "Il y a 4h" },
-    { type: "Compatibilité", item: "Bulldozer D6T ↔ Filtre air AF25424", time: "Il y a 6h" },
     { type: "Alerte", item: "Stock filtre HF6177 bas", time: "Il y a 1j" },
   ];
 
@@ -145,15 +137,6 @@ export function DashboardOverview() {
             >
               <Filter className="h-4 w-4 mr-2" />
               Nouvelle référence filtre
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start" 
-              size="sm"
-              onClick={() => handleNavigation('/compatibilites', 'Redirection vers les compatibilités')}
-            >
-              <Link2 className="h-4 w-4 mr-2" />
-              Mapper compatibilité
             </Button>
             <Button 
               variant="outline" 

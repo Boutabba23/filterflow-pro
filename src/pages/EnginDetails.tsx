@@ -33,7 +33,6 @@ export default function EnginDetails() {
     marque: "Caterpillar",
     type: "D8R",
     heures: 2450,
-    statut: "Actif",
     derniereMaintenancePréventive: "2024-01-15",
     prochaineMaintenance: "2024-08-15",
     localisation: "Chantier Nord",
@@ -148,7 +147,10 @@ export default function EnginDetails() {
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Type</p>
-                <Badge variant="outline" className="border-primary/20 text-primary">
+                <Badge
+                  variant="outline"
+                  className="border-primary/20 text-primary"
+                >
                   {engin.type}
                 </Badge>
               </div>
@@ -161,34 +163,17 @@ export default function EnginDetails() {
                   </span>
                 </div>
               </div>
+
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Statut</p>
-                <Badge variant="outline" className={getStatusColor(engin.statut)}>
-                  {engin.statut}
-                </Badge>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Localisation</p>
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>{engin.localisation}</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Dernière Maintenance</p>
+                <p className="text-sm text-muted-foreground">
+                  Dernière Maintenance
+                </p>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span>
-                    {new Date(engin.derniereMaintenancePréventive).toLocaleDateString("fr-FR")}
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Prochaine Maintenance</p>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>
-                    {new Date(engin.prochaineMaintenance).toLocaleDateString("fr-FR")}
+                    {new Date(
+                      engin.derniereMaintenancePréventive
+                    ).toLocaleDateString("fr-FR")}
                   </span>
                 </div>
               </div>
@@ -213,8 +198,7 @@ export default function EnginDetails() {
                   <TableHead>Position</TableHead>
                   <TableHead>Fréquence</TableHead>
                   <TableHead>Dernier Changement</TableHead>
-                  <TableHead>Prochain Changement</TableHead>
-                  <TableHead>Statut</TableHead>
+
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -231,7 +215,10 @@ export default function EnginDetails() {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="border-accent/20 text-accent">
+                      <Badge
+                        variant="outline"
+                        className="border-accent/20 text-accent"
+                      >
                         {filtre.type}
                       </Badge>
                     </TableCell>
@@ -242,23 +229,12 @@ export default function EnginDetails() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3 text-muted-foreground" />
-                        {new Date(filtre.dernierChangement).toLocaleDateString("fr-FR")}
+                        {new Date(filtre.dernierChangement).toLocaleDateString(
+                          "fr-FR"
+                        )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 text-muted-foreground" />
-                        {new Date(filtre.prochainChangement).toLocaleDateString("fr-FR")}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={getFilterStatusColor(filtre.statut)}
-                      >
-                        {filtre.statut}
-                      </Badge>
-                    </TableCell>
+
                     <TableCell className="text-right">
                       <Button variant="outline" size="sm" asChild>
                         <Link to={`/filtres/${filtre.id}`}>

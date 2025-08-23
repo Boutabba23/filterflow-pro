@@ -38,12 +38,44 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Engins() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [currentEngin, setCurrentEngin] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    code: "",
+    désignation: "",
+    marque: "",
+    type: "",
+    heures: 0,
+  });
+
+  const [formData, setFormData] = useState({
+    code: "",
+    désignation: "",
+    marque: "",
+    type: "",
+    heures: 0,
+  });
+
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [enginToDelete, setEnginToDelete] = useState<number | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Mock data - sera remplacé par les données Supabase
-  const engins = [
+  const [engins, setEngins] = useState([
     {
       id: 1,
       code: "A03010236",
@@ -64,7 +96,7 @@ export default function Engins() {
       statut: "Actif",
       derniereMaintenancePréventive: "2024-04-15",
     },
-  ];
+  ]);
 
   const filteredEngins = engins.filter(
     (engin) =>
@@ -72,6 +104,123 @@ export default function Engins() {
       engin.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
       engin.marque.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleEditClick = (engin) => {
+    setCurrentEngin(engin);
+    setEditFormData({
+      code: engin.code,
+      désignation: engin.désignation,
+      marque: engin.marque,
+      type: engin.type,
+      heures: engin.heures,
+    });
+    setEditOpen(true);
+  };
+
+  const handleEditInputChange = (e) => {
+    const { id, value } = e.target;
+    const fieldName = id.replace("edit-", "");
+    setEditFormData((prev) => ({
+      ...prev,
+      [fieldName]: value,
+    }));
+  };
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: id === "heures" ? Number(value) : value,
+    }));
+    // Clear error when user starts typing
+    setErrors({ ...errors, [id]: "" });
+  };
+
+  const handleSaveEdit = () => {
+    if (currentEngin) {
+      const updatedEngins = engins.map((engin) =>
+        engin.id === currentEngin.id
+          ? {
+              ...engin,
+              code: editFormData.code,
+              désignation: editFormData.désignation,
+              marque: editFormData.marque,
+              type: editFormData.type,
+              heures: Number(editFormData.heures),
+            }
+          : engin
+      );
+      setEngins(updatedEngins);
+      setEditOpen(false);
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.code.trim()) {
+      newErrors.code = "Le code est requis";
+    }
+    if (!formData.désignation.trim()) {
+      newErrors.désignation = "La désignation est requise";
+    }
+    if (!formData.marque.trim()) {
+      newErrors.marque = "La marque est requise";
+    }
+    if (!formData.type.trim()) {
+      newErrors.type = "Le type est requis";
+    }
+    if (isNaN(Number(formData.heures)) || Number(formData.heures) < 0) {
+      newErrors.heures = "Les heures doivent être un nombre positif";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleAddEngin = () => {
+    if (!validateForm()) return;
+
+    const newEngin = {
+      id: engins.length > 0 ? Math.max(...engins.map((e) => e.id)) + 1 : 1,
+      code: formData.code,
+      désignation: formData.désignation,
+      marque: formData.marque,
+      type: formData.type,
+      heures: Number(formData.heures),
+      statut: "Actif",
+      derniereMaintenancePréventive: new Date().toISOString().split("T")[0],
+    };
+
+    setEngins([...engins, newEngin]);
+    setFormData({
+      code: "",
+      désignation: "",
+      marque: "",
+      type: "",
+      heures: 0,
+    });
+    setErrors({});
+    setAddDialogOpen(false);
+  };
+
+  const handleDeleteEngin = (id: number) => {
+    setEnginToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteEngin = () => {
+    if (enginToDelete !== null) {
+      setEngins(engins.filter(engin => engin.id !== enginToDelete));
+      setEnginToDelete(null);
+      setDeleteDialogOpen(false);
+    }
+  };
+
+  const cancelDeleteEngin = () => {
+    setEnginToDelete(null);
+    setDeleteDialogOpen(false);
+  };
 
   const getStatusColor = (statut: string) => {
     switch (statut) {
@@ -99,9 +248,12 @@ export default function Engins() {
               Gérez votre parc d'engins de chantier
             </p>
           </div>
-          <Dialog>
+          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary-hover">
+              <Button
+                className="bg-primary hover:bg-primary-hover"
+                onClick={() => setAddDialogOpen(true)}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Nouvel Engin
               </Button>
@@ -114,36 +266,87 @@ export default function Engins() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="code">Code</Label>
-                    <Input id="code" placeholder="ex: A03010236" />
+                    <Input
+                      id="code"
+                      placeholder="ex: A03010236"
+                      value={formData.code}
+                      onChange={handleInputChange}
+                      className={errors.code ? "border-destructive" : ""}
+                    />
+                    {errors.code && (
+                      <p className="text-sm text-destructive">{errors.code}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="désignation">Désignation</Label>
                     <Input
                       id="désignation"
                       placeholder="ex: BULL SUR CHENILLE"
+                      value={formData.désignation}
+                      onChange={handleInputChange}
+                      className={errors.désignation ? "border-destructive" : ""}
                     />
+                    {errors.désignation && (
+                      <p className="text-sm text-destructive">{errors.désignation}</p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="marque">Marque</Label>
-                    <Input id="marque" placeholder="ex: Caterpillar" />
+                    <Input
+                      id="marque"
+                      placeholder="ex: Caterpillar"
+                      value={formData.marque}
+                      onChange={handleInputChange}
+                      className={errors.marque ? "border-destructive" : ""}
+                    />
+                    {errors.marque && (
+                      <p className="text-sm text-destructive">{errors.marque}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="type">Type</Label>
-                    <Input id="type" placeholder="ex: Caterpillar" />
+                    <Input
+                      id="type"
+                      placeholder="ex: D8R"
+                      value={formData.type}
+                      onChange={handleInputChange}
+                      className={errors.type ? "border-destructive" : ""}
+                    />
+                    {errors.type && (
+                      <p className="text-sm text-destructive">{errors.type}</p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="heures">Heures</Label>
-                    <Input id="heures" type="number" placeholder="0" />
+                    <Input
+                      id="heures"
+                      type="number"
+                      placeholder="0"
+                      value={formData.heures}
+                      onChange={handleInputChange}
+                      className={errors.heures ? "border-destructive" : ""}
+                    />
+                    {errors.heures && (
+                      <p className="text-sm text-destructive">{errors.heures}</p>
+                    )}
                   </div>
                 </div>
               </div>
               <div className="flex justify-end space-x-2">
-                <Button variant="outline">Annuler</Button>
-                <Button className="bg-primary hover:bg-primary-hover">
+                <Button
+                  variant="outline"
+                  onClick={() => setAddDialogOpen(false)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  className="bg-primary hover:bg-primary-hover"
+                  onClick={handleAddEngin}
+                >
                   Ajouter
                 </Button>
               </div>
@@ -205,7 +408,7 @@ export default function Engins() {
                   <TableRow key={engin.id}>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Link 
+                        <Link
                           to={`/engins/${engin.id}`}
                           className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium"
                         >
@@ -250,60 +453,89 @@ export default function Engins() {
 
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Dialog>
+                        <Dialog
+                          open={currentEngin?.id === engin.id && editOpen}
+                          onOpenChange={(open) => !open && setEditOpen(false)}
+                        >
                           <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditClick(engin)}
+                            >
                               <Edit className="h-3 w-3" />
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-2xl">
                             <DialogHeader>
-                              <DialogTitle>Modifier l'engin - {engin.code}</DialogTitle>
+                              <DialogTitle>
+                                Modifier l'engin - {currentEngin?.code}
+                              </DialogTitle>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <Label htmlFor="edit-code">Code Engin</Label>
-                                  <Input id="edit-code" defaultValue={engin.code} />
+                                  <Input
+                                    id="edit-code"
+                                    value={editFormData.code}
+                                    onChange={handleEditInputChange}
+                                  />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-modele">Désignation</Label>
-                                  <Input id="edit-modele" defaultValue={engin.désignation} />
+                                  <Label htmlFor="edit-désignation">
+                                    Désignation
+                                  </Label>
+                                  <Input
+                                    id="edit-désignation"
+                                    value={editFormData.désignation}
+                                    onChange={handleEditInputChange}
+                                  />
                                 </div>
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-fabricant">Marque</Label>
-                                  <Input id="edit-fabricant" defaultValue={engin.marque} />
+                                  <Label htmlFor="edit-marque">Marque</Label>
+                                  <Input
+                                    id="edit-marque"
+                                    value={editFormData.marque}
+                                    onChange={handleEditInputChange}
+                                  />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-annee">Type</Label>
-                                  <Input id="edit-annee" defaultValue={engin.type} />
+                                  <Label htmlFor="edit-type">Type</Label>
+                                  <Input
+                                    id="edit-type"
+                                    value={editFormData.type}
+                                    onChange={handleEditInputChange}
+                                  />
                                 </div>
                               </div>
-                              <div className="grid grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 gap-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="edit-heures">Heures de Service</Label>
-                                  <Input id="edit-heures" type="number" defaultValue={engin.heures} />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-statut">Statut</Label>
-                                  <Select defaultValue={engin.statut.toLowerCase()}>
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="actif">Actif</SelectItem>
-                                      <SelectItem value="maintenance">En Maintenance</SelectItem>
-                                      <SelectItem value="inactif">Inactif</SelectItem>
-                                    </SelectContent>
-                                  </Select>
+                                  <Label htmlFor="edit-heures">
+                                    Heures de Service
+                                  </Label>
+                                  <Input
+                                    id="edit-heures"
+                                    type="number"
+                                    value={editFormData.heures}
+                                    onChange={handleEditInputChange}
+                                  />
                                 </div>
                               </div>
                             </div>
                             <div className="flex justify-end space-x-2">
-                              <Button variant="outline">Annuler</Button>
-                              <Button className="bg-primary hover:bg-primary-hover">
+                              <Button
+                                variant="outline"
+                                onClick={() => setEditOpen(false)}
+                              >
+                                Annuler
+                              </Button>
+                              <Button
+                                className="bg-primary hover:bg-primary-hover"
+                                onClick={handleSaveEdit}
+                              >
                                 Sauvegarder
                               </Button>
                             </div>
@@ -313,6 +545,7 @@ export default function Engins() {
                           variant="outline"
                           size="sm"
                           className="text-destructive border-destructive/20 hover:bg-destructive/10"
+                          onClick={() => handleDeleteEngin(engin.id)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -325,6 +558,23 @@ export default function Engins() {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer cet engin ? Cette action est irréversible et supprimera toutes les données associées.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDeleteEngin}>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteEngin} className="bg-destructive hover:bg-destructive-hover">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>
   );
 }
