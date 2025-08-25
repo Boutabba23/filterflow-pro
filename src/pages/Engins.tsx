@@ -3,22 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -26,18 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Wrench,
-  Calendar,
-  MapPin,
-  HourglassIcon,
-} from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,9 +30,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EnginCard } from "@/components/engins/EnginCard";
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Wrench,
+  Calendar,
+  MapPin,
+  HourglassIcon,
+  Building2,
+  Cog,
+} from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Engins() {
+  const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [currentEngin, setCurrentEngin] = useState(null);
@@ -97,6 +94,16 @@ export default function Engins() {
       statut: "Actif",
       derniereMaintenancePréventive: "2024-04-15",
     },
+    {
+      id: 3,
+      code: "A05030891",
+      désignation: "CHARGEUSE SUR PNEUS",
+      marque: "Caterpillar",
+      type: "950M",
+      heures: 3200,
+      statut: "Maintenance",
+      derniereMaintenancePréventive: "2024-02-20",
+    },
   ]);
 
   const filteredEngins = engins.filter(
@@ -133,7 +140,6 @@ export default function Engins() {
       ...prev,
       [id]: id === "heures" ? Number(value) : value,
     }));
-    // Clear error when user starts typing
     setErrors({ ...errors, [id]: "" });
   };
 
@@ -196,7 +202,7 @@ export default function Engins() {
     setEngins([...engins, newEngin]);
     setFormData({
       code: "",
-      désignation: "",
+      désignation: "",	
       marque: "",
       type: "",
       heures: 0,
@@ -236,345 +242,356 @@ export default function Engins() {
     }
   };
 
+  const getEnginIcon = (designation: string) => {
+    if (designation.includes("BULL")) return "🚜";
+    if (designation.includes("PELLE")) return "🚧";
+    if (designation.includes("CHARGEUSE")) return "🏗️";
+    return "🔧";
+  };
+
   return (
     <MainLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-              Gestion des Engins
-            </h2>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Gérez votre parc d'engins de chantier
-            </p>
+      <div className="min-h-screen bg-gradient-subtle">
+        <div className="space-y-8">
+          {/* Animated Header Section */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-header p-8 shadow-glow animate-fade-in">
+            <div className="absolute inset-0 bg-black/5 backdrop-blur-sm"></div>
+            <div className="relative z-10 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4 animate-bounce-in">
+                <Wrench className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-4xl font-bold text-white mb-2 animate-slide-in">
+                Gestion des Engins
+              </h1>
+              <p className="text-white/90 text-lg mb-6 animate-slide-in">
+                Gérez votre parc d'engins de chantier
+              </p>
+              <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    size="lg"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-vibrant animate-scale-in"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Nouvel Engin
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}>
+                  <DialogHeader>
+                    <DialogTitle>Ajouter un Nouvel Engin</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+                      <div className="space-y-2">
+                        <Label htmlFor="code">Code</Label>
+                        <Input
+                          id="code"
+                          placeholder="ex: A03010236"
+                          value={formData.code}
+                          onChange={handleInputChange}
+                          className={errors.code ? "border-destructive" : ""}
+                        />
+                        {errors.code && (
+                          <p className="text-sm text-destructive">{errors.code}</p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="désignation">Désignation</Label>
+                        <Input
+                          id="désignation"
+                          placeholder="ex: BULL SUR CHENILLE"
+                          value={formData.désignation}
+                          onChange={handleInputChange}
+                          className={errors.désignation ? "border-destructive" : ""}
+                        />
+                        {errors.désignation && (
+                          <p className="text-sm text-destructive">
+                            {errors.désignation}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+                      <div className="space-y-2">
+                        <Label htmlFor="marque">Marque</Label>
+                        <Input
+                          id="marque"
+                          placeholder="ex: Caterpillar"
+                          value={formData.marque}
+                          onChange={handleInputChange}
+                          className={errors.marque ? "border-destructive" : ""}
+                        />
+                        {errors.marque && (
+                          <p className="text-sm text-destructive">
+                            {errors.marque}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="type">Type</Label>
+                        <Input
+                          id="type"
+                          placeholder="ex: D8R"
+                          value={formData.type}
+                          onChange={handleInputChange}
+                          className={errors.type ? "border-destructive" : ""}
+                        />
+                        {errors.type && (
+                          <p className="text-sm text-destructive">{errors.type}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="heures">Heures</Label>
+                      <Input
+                        id="heures"
+                        type="number"
+                        placeholder="0"
+                        value={formData.heures}
+                        onChange={handleInputChange}
+                        className={errors.heures ? "border-destructive" : ""}
+                      />
+                      {errors.heures && (
+                        <p className="text-sm text-destructive">
+                          {errors.heures}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                    <DialogClose asChild>
+                      <Button variant="outline" className="w-full sm:w-auto">
+                        Annuler
+                      </Button>
+                    </DialogClose>
+                    <Button
+                      className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
+                      onClick={handleAddEngin}
+                    >
+                      Ajouter
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
-          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button
-                className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
-                onClick={() => setAddDialogOpen(true)}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Nouvel Engin</span>
-                <span className="sm:hidden">Ajouter</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Ajouter un Nouvel Engin</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="code">Code</Label>
-                    <Input
-                      id="code"
-                      placeholder="ex: A03010236"
-                      value={formData.code}
-                      onChange={handleInputChange}
-                      className={errors.code ? "border-destructive" : ""}
-                    />
-                    {errors.code && (
-                      <p className="text-sm text-destructive">{errors.code}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="désignation">Désignation</Label>
-                    <Input
-                      id="désignation"
-                      placeholder="ex: BULL SUR CHENILLE"
-                      value={formData.désignation}
-                      onChange={handleInputChange}
-                      className={errors.désignation ? "border-destructive" : ""}
-                    />
-                    {errors.désignation && (
-                      <p className="text-sm text-destructive">
-                        {errors.désignation}
-                      </p>
-                    )}
-                  </div>
+
+          {/* Animated Search Section */}
+          <Card className="shadow-vibrant bg-gradient-card border-0 overflow-hidden animate-fade-in">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
+                <div className="relative flex-1 w-full">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary animate-pulse" />
+                  <Input
+                    placeholder="Rechercher par code, type, marque..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-12 text-lg border-primary/20 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:shadow-glow"
+                  />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="marque">Marque</Label>
-                    <Input
-                      id="marque"
-                      placeholder="ex: Caterpillar"
-                      value={formData.marque}
-                      onChange={handleInputChange}
-                      className={errors.marque ? "border-destructive" : ""}
-                    />
-                    {errors.marque && (
-                      <p className="text-sm text-destructive">
-                        {errors.marque}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Type</Label>
-                    <Input
-                      id="type"
-                      placeholder="ex: D8R"
-                      value={formData.type}
-                      onChange={handleInputChange}
-                      className={errors.type ? "border-destructive" : ""}
-                    />
-                    {errors.type && (
-                      <p className="text-sm text-destructive">{errors.type}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="heures">Heures</Label>
-                    <Input
-                      id="heures"
-                      type="number"
-                      placeholder="0"
-                      value={formData.heures}
-                      onChange={handleInputChange}
-                      className={errors.heures ? "border-destructive" : ""}
-                    />
-                    {errors.heures && (
-                      <p className="text-sm text-destructive">
-                        {errors.heures}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                <Select>
+                  <SelectTrigger className="w-full lg:w-56 h-12 border-accent/20 focus:border-accent hover:shadow-vibrant transition-all duration-300">
+                    <SelectValue placeholder="Filtrer par statut" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gradient-card">
+                    <SelectItem value="all">Tous les statuts</SelectItem>
+                    <SelectItem value="actif">✅ Actif</SelectItem>
+                    <SelectItem value="maintenance">🔧 Maintenance</SelectItem>
+                    <SelectItem value="reparation">⚠️ Réparation</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setAddDialogOpen(false)}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  className="bg-primary hover:bg-primary-hover"
-                  onClick={handleAddEngin}
-                >
-                  Ajouter
-                </Button>
+            </CardContent>
+          </Card>
+
+          {/* Animated Engins Grid */}
+          <Card className="shadow-glow bg-gradient-card border-0 overflow-hidden animate-fade-in">
+            <CardHeader className="bg-gradient-rainbow text-white">
+              <CardTitle className="flex items-center gap-3 text-2xl">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                  <Cog className="h-6 w-6" />
+                </div>
+                Parc d'Engins ({filteredEngins.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {/* Modern Grid Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredEngins.map((engin, index) => (
+                  <div 
+                    key={engin.id}
+                    className="group relative bg-white dark:bg-card rounded-2xl p-6 shadow-card hover:shadow-vibrant transition-all duration-500 hover:scale-105 animate-scale-in border border-primary/5 hover:border-primary/20"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    {/* Gradient Background Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-2xl">
+                            {getEnginIcon(engin.désignation)}
+                          </div>
+                          <div>
+                            <Link
+                              to={`/engins/${engin.id}`}
+                              className="text-lg font-bold text-primary hover:text-primary-hover transition-colors duration-200 hover:underline"
+                            >
+                              {engin.code}
+                            </Link>
+                            <Badge 
+                              className={`ml-2 ${getStatusColor(engin.statut)} text-xs animate-pulse`}
+                            >
+                              {engin.statut}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description & Type */}
+                      <div className="mb-4">
+                        <h3 className="font-semibold text-foreground mb-1">{engin.désignation}</h3>
+                        <Badge variant="outline" className="text-xs bg-accent/10 border-accent/20 text-accent">
+                          {engin.type}
+                        </Badge>
+                      </div>
+
+                      {/* Manufacturer & Hours */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-foreground">{engin.marque}</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-success/10 px-3 py-1 rounded-full">
+                          <HourglassIcon className="h-4 w-4 text-success" />
+                          <span className="font-bold text-success">{engin.heures.toLocaleString()}h</span>
+                        </div>
+                      </div>
+
+                      {/* Last Maintenance */}
+                      <div className="flex items-center gap-2 mb-4 p-2 bg-muted/30 rounded-lg">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span className="text-sm text-foreground">
+                          Dernière maintenance: <span className="font-bold text-primary">
+                            {new Date(engin.derniereMaintenancePréventive).toLocaleDateString("fr-FR")}
+                          </span>
+                        </span>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 bg-accent/10 text-accent border-accent/20 hover:bg-accent hover:text-accent-foreground transition-all duration-300 hover:scale-105"
+                          onClick={() => handleEditClick(engin)}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Modifier
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteEngin(engin.id)}
+                          className="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive hover:text-destructive-foreground transition-all duration-300 hover:scale-105"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </DialogContent>
-          </Dialog>
+
+              {/* Empty State */}
+              {filteredEngins.length === 0 && (
+                <div className="text-center py-16 animate-fade-in">
+                  <div className="w-24 h-24 mx-auto mb-4 bg-gradient-vibrant rounded-full flex items-center justify-center">
+                    <Wrench className="h-12 w-12 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground mb-2">Aucun engin trouvé</h3>
+                  <p className="text-muted-foreground">Essayez de modifier vos critères de recherche</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-
-        {/* Search and Filters */}
-        <Card className="shadow-card">
-          <CardContent className="pt-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher par modèle, type ou fabricant..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Filtrer par statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
-                  <SelectItem value="actif">Actif</SelectItem>
-                  <SelectItem value="maintenance">Maintenance</SelectItem>
-                  <SelectItem value="reparation">Réparation</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Engins List */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Liste des Engins ({filteredEngins.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Desktop Table */}
-            <div className="hidden lg:block">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Désignation</TableHead>
-                      <TableHead>Marque</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Heures</TableHead>
-                      <TableHead>Dernière Maintenance</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredEngins.map((engin) => (
-                      <TableRow key={engin.id}>
-                        <TableCell>
-                          <Link
-                            to={`/engins/${engin.id}`}
-                            className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium"
-                          >
-                            {engin.code}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{engin.désignation}</TableCell>
-                        <TableCell>{engin.marque}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className="border-primary/20 text-primary"
-                          >
-                            {engin.type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-mono">
-                          <div className="flex items-center gap-1">
-                            <HourglassIcon className="h-3 w-3 text-muted-foreground" />
-                            {engin.heures.toLocaleString()}h
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3 text-muted-foreground" />
-                            {new Date(
-                              engin.derniereMaintenancePréventive
-                            ).toLocaleDateString("fr-FR")}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Dialog
-                              open={currentEngin?.id === engin.id && editOpen}
-                              onOpenChange={(open) =>
-                                !open && setEditOpen(false)
-                              }
-                            >
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleEditClick(engin)}
-                                >
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-2xl">
-                                <DialogHeader>
-                                  <DialogTitle>
-                                    Modifier l'engin - {currentEngin?.code}
-                                  </DialogTitle>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-code">
-                                        Code Engin
-                                      </Label>
-                                      <Input
-                                        id="edit-code"
-                                        value={editFormData.code}
-                                        onChange={handleEditInputChange}
-                                      />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-désignation">
-                                        Désignation
-                                      </Label>
-                                      <Input
-                                        id="edit-désignation"
-                                        value={editFormData.désignation}
-                                        onChange={handleEditInputChange}
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-marque">
-                                        Marque
-                                      </Label>
-                                      <Input
-                                        id="edit-marque"
-                                        value={editFormData.marque}
-                                        onChange={handleEditInputChange}
-                                      />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <Label htmlFor="edit-type">Type</Label>
-                                      <Input
-                                        id="edit-type"
-                                        value={editFormData.type}
-                                        onChange={handleEditInputChange}
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-heures">
-                                      Heures de Service
-                                    </Label>
-                                    <Input
-                                      id="edit-heures"
-                                      type="number"
-                                      value={editFormData.heures}
-                                      onChange={handleEditInputChange}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="flex flex-col sm:flex-row justify-end gap-2">
-                                  <Button
-                                    variant="outline"
-                                    className="w-full sm:w-auto"
-                                    onClick={() => setEditOpen(false)}
-                                  >
-                                    Annuler
-                                  </Button>
-                                  <Button
-                                    className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
-                                    onClick={handleSaveEdit}
-                                  >
-                                    Sauvegarder
-                                  </Button>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-destructive border-destructive/20 hover:bg-destructive/10"
-                              onClick={() => handleDeleteEngin(engin.id)}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-
-            {/* Mobile Cards */}
-            <div className="lg:hidden space-y-4">
-              {filteredEngins.map((engin) => (
-                <EnginCard
-                  key={engin.id}
-                  engin={engin}
-                  onEdit={handleEditClick}
-                  onDelete={handleDeleteEngin}
-                />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
+      {/* Edit Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}>
+          <DialogHeader>
+            <DialogTitle>
+              Modifier l'engin - {currentEngin?.code}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+              <div className="space-y-2">
+                <Label htmlFor="edit-code">Code Engin</Label>
+                <Input
+                  id="edit-code"
+                  value={editFormData.code}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-désignation">Désignation</Label>
+                <Input
+                  id="edit-désignation"
+                  value={editFormData.désignation}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+            </div>
+            <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+              <div className="space-y-2">
+                <Label htmlFor="edit-marque">Marque</Label>
+                <Input
+                  id="edit-marque"
+                  value={editFormData.marque}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-type">Type</Label>
+                <Input
+                  id="edit-type"
+                  value={editFormData.type}
+                  onChange={handleEditInputChange}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-heures">Heures</Label>
+              <Input
+                id="edit-heures"
+                type="number"
+                value={editFormData.heures}
+                onChange={handleEditInputChange}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+            <DialogClose asChild>
+              <Button variant="outline" className="w-full sm:w-auto">
+                Annuler
+              </Button>
+            </DialogClose>
+            <Button
+              className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
+              onClick={handleSaveEdit}
+            >
+              Sauvegarder
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
