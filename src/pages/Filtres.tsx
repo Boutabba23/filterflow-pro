@@ -4,24 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  ResponsiveTable,
-  MobileCard,
-  ResponsiveTableHeader,
-  ResponsiveTableBody,
-} from "@/components/ui/responsive-table";
-import {
-  ResponsiveContainer,
-  ResponsiveStack,
-} from "@/components/ui/responsive-container";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -38,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Plus,
   Search,
@@ -46,7 +27,8 @@ import {
   Trash2,
   Filter,
   Package,
-  Link as LinkIcon,
+  Building2,
+  Euro,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -123,6 +105,7 @@ export default function Filtres() {
       prixUnitaire: 28.75,
     },
   ]);
+
   const filteredFiltres = filtres.filter(
     (filtre) =>
       filtre.referencePrincipale
@@ -241,692 +224,346 @@ export default function Filtres() {
     setNewPrix("");
     setNewStock("");
     setErrors({});
-    // Only close the dialog if validation passes
     setDialogOpen(false);
   };
 
   return (
     <MainLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">
-              Gestion des Filtres
-            </h2>
-            <p className="text-muted-foreground">
-              Gérez vos références de filtres et compatibilités
-            </p>
-          </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
-                Nouveau Filtre
-              </Button>
-            </DialogTrigger>
-            <DialogContent
-              className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}
-            >
-              <DialogHeader>
-                <DialogTitle>Ajouter un Nouveau Filtre</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="designation">Désignation</Label>
-                  <Input
-                    id="designation"
-                    placeholder="ex: Filtre à huile moteur"
-                    value={newDesignation}
-                    onChange={(e) => {
-                      setNewDesignation(e.target.value);
-                      setErrors({ ...errors, designation: "" });
-                    }}
-                    className={errors.designation ? "border-destructive" : ""}
-                  />
-                  {errors.designation && (
-                    <p className="text-sm text-destructive">
-                      {errors.designation}
-                    </p>
-                  )}
-                </div>
-                <div
-                  className={`${
-                    isMobile ? "grid grid-cols-1" : "grid grid-cols-2"
-                  } gap-4`}
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="reference">Référence Principale</Label>
-                    <Input
-                      id="reference"
-                      placeholder="ex: HF6177"
-                      value={newReference}
-                      onChange={(e) => {
-                        setNewReference(e.target.value);
-                        setErrors({ ...errors, reference: "" });
-                      }}
-                      className={errors.reference ? "border-destructive" : ""}
-                    />
-                    {errors.reference && (
-                      <p className="text-sm text-destructive">
-                        {errors.reference}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Type de Filtre</Label>
-                    <Select
-                      value={newType}
-                      onValueChange={(value) => {
-                        setNewType(value);
-                        setErrors({ ...errors, type: "" });
-                      }}
-                    >
-                      <SelectTrigger
-                        className={errors.type ? "border-destructive" : ""}
-                      >
-                        <SelectValue placeholder="Sélectionner le type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="hydraulique">Hydraulique</SelectItem>
-                        <SelectItem value="air">Air</SelectItem>
-                        <SelectItem value="carburant">Carburant</SelectItem>
-                        <SelectItem value="huile">Huile</SelectItem>
-                        <SelectItem value="transmission">
-                          Transmission
-                        </SelectItem>
-                        <SelectItem value="cabine">Cabine</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.type && (
-                      <p className="text-sm text-destructive">{errors.type}</p>
-                    )}
-                  </div>
-                </div>
-                <div
-                  className={`${
-                    isMobile ? "grid grid-cols-1" : "grid grid-cols-2"
-                  } gap-4`}
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="fabricant">Fabricant</Label>
-                    <Input
-                      id="fabricant"
-                      placeholder="ex: Caterpillar, Fleetguard..."
-                      value={newFabricant}
-                      onChange={(e) => {
-                        setNewFabricant(e.target.value);
-                        setErrors({ ...errors, fabricant: "" });
-                      }}
-                      className={errors.fabricant ? "border-destructive" : ""}
-                    />
-                    {errors.fabricant && (
-                      <p className="text-sm text-destructive">
-                        {errors.fabricant}
-                      </p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="prix">Prix Unitaire (DA)</Label>
-                    <Input
-                      id="prix"
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={newPrix}
-                      onChange={(e) => {
-                        setNewPrix(e.target.value);
-                        setErrors({ ...errors, prix: "" });
-                      }}
-                      className={errors.prix ? "border-destructive" : ""}
-                    />
-                    {errors.prix && (
-                      <p className="text-sm text-destructive">{errors.prix}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="stock">Stock Initial</Label>
-                  <Input
-                    id="stock"
-                    type="number"
-                    placeholder="0"
-                    value={newStock}
-                    onChange={(e) => {
-                      setNewStock(e.target.value);
-                      setErrors({ ...errors, stock: "" });
-                    }}
-                    className={errors.stock ? "border-destructive" : ""}
-                  />
-                  {errors.stock && (
-                    <p className="text-sm text-destructive">{errors.stock}</p>
-                  )}
-                </div>
+      <div className="min-h-screen bg-gradient-subtle">
+        <div className="space-y-8">
+          {/* Animated Header Section */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-header p-8 shadow-glow animate-fade-in">
+            <div className="absolute inset-0 bg-black/5 backdrop-blur-sm"></div>
+            <div className="relative z-10 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4 animate-bounce-in">
+                <Filter className="h-8 w-8 text-white" />
               </div>
-              <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
-                <DialogClose asChild>
-                  <Button variant="outline" className="w-full sm:w-auto">
-                    Annuler
+              <h1 className="text-4xl font-bold text-white mb-2 animate-slide-in">
+                Gestion des Filtres
+              </h1>
+              <p className="text-white/90 text-lg mb-6 animate-slide-in">
+                Gérez vos références de filtres et compatibilités
+              </p>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    size="lg"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-vibrant animate-scale-in"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Nouveau Filtre
                   </Button>
-                </DialogClose>
-                <Button
-                  className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
-                  onClick={handleAddFiltre}
-                >
-                  Ajouter
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* Search and Filters */}
-        <Card className="shadow-card">
-          <CardContent className="pt-6">
-            <div
-              className={`${
-                isMobile ? "flex flex-col space-y-4" : "flex items-center"
-              } gap-4`}
-            >
-              <div className={`${isMobile ? "w-full" : "flex-1"} relative`}>
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher par référence, type, fabricant..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select>
-                <SelectTrigger className={`${isMobile ? "w-full" : "w-48"}`}>
-                  <SelectValue placeholder="Filtrer par type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tous les types</SelectItem>
-                  <SelectItem value="hydraulique">Hydraulique</SelectItem>
-                  <SelectItem value="air">Air</SelectItem>
-                  <SelectItem value="carburant">Carburant</SelectItem>
-                  <SelectItem value="huile">Huile</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Filtres Table */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-primary" />
-              Catalogue des Filtres ({filteredFiltres.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Desktop Table */}
-            <div className="hidden md:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Référence</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Fabricant</TableHead>
-                    <TableHead>Compatibilités</TableHead>
-                    <TableHead>Engins</TableHead>
-                    <TableHead>Stock</TableHead>
-                    <TableHead>Prix</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredFiltres.map((filtre) => (
-                    <TableRow key={filtre.id}>
-                      <TableCell>
-                        <div>
-                          <Link
-                            to={`/filtres/${filtre.id}`}
-                            className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium font-mono"
-                          >
-                            {filtre.referencePrincipale}
-                          </Link>
-                          <div className="text-sm text-muted-foreground max-w-48 truncate">
-                            {filtre.description}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getTypeColor(filtre.type)}>
-                          {filtre.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-foreground">
-                        {filtre.fabricant}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <LinkIcon className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-sm font-mono">
-                            {filtre.referencesCompatibles.length} ref.
-                          </span>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-5 px-2 text-xs"
-                              >
-                                Voir
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>
-                                  Références Compatibles -{" "}
-                                  {filtre.referencePrincipale}
-                                </DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-2">
-                                {filtre.referencesCompatibles.map(
-                                  (ref, index) => (
-                                    <div
-                                      key={index}
-                                      className="flex items-center justify-between p-2 bg-muted/20 rounded"
-                                    >
-                                      <span className="font-mono">{ref}</span>
-                                      {index === 0 && (
-                                        <Badge
-                                          variant="outline"
-                                          className="text-xs"
-                                        >
-                                          Principal
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  )
-                                )}
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Package className="h-3 w-3 text-muted-foreground" />
-                          {filtre.enginCompatibles}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStockStatus(filtre.stock)}>
-                          {filtre.stock} unités
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="font-mono font-medium">
-                        {filtre.prixUnitaire.toFixed(2)} DA
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle>
-                                  Modifier le filtre -{" "}
-                                  {filtre.referencePrincipale}
-                                </DialogTitle>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-ref">
-                                      Référence Principale
-                                    </Label>
-                                    <Input
-                                      id="edit-ref"
-                                      defaultValue={filtre.referencePrincipale}
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-type">Type</Label>
-                                    <Select
-                                      defaultValue={filtre.type
-                                        .toLowerCase()
-                                        .replace(" ", "-")}
-                                    >
-                                      <SelectTrigger>
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="huile-moteur">
-                                          Huile moteur
-                                        </SelectItem>
-                                        <SelectItem value="carburant">
-                                          Carburant
-                                        </SelectItem>
-                                        <SelectItem value="air">Air</SelectItem>
-                                        <SelectItem value="hydraulique">
-                                          Hydraulique
-                                        </SelectItem>
-                                        <SelectItem value="transmission">
-                                          Transmission
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-fabricant">
-                                      Fabricant
-                                    </Label>
-                                    <Input
-                                      id="edit-fabricant"
-                                      defaultValue={filtre.fabricant}
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-prix">
-                                      Prix Unitaire (DA)
-                                    </Label>
-                                    <Input
-                                      id="edit-prix"
-                                      type="number"
-                                      step="0.01"
-                                      defaultValue={filtre.prixUnitaire}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-stock">Stock</Label>
-                                    <Input
-                                      id="edit-stock"
-                                      type="number"
-                                      defaultValue={filtre.stock}
-                                    />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label htmlFor="edit-engins">
-                                      Engins Compatibles
-                                    </Label>
-                                    <Input
-                                      id="edit-engins"
-                                      type="number"
-                                      defaultValue={filtre.enginCompatibles}
-                                    />
-                                  </div>
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-description">
-                                    Description
-                                  </Label>
-                                  <Input
-                                    id="edit-description"
-                                    defaultValue={filtre.description}
-                                  />
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <DialogClose asChild>
-                                  <Button variant="outline">Annuler</Button>
-                                </DialogClose>
-                                <Button className="bg-primary hover:bg-primary-hover">
-                                  Sauvegarder
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-destructive border-destructive/20 hover:bg-destructive/10"
-                            onClick={() => handleDeleteFiltre(filtre.id)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Mobile Cards */}
-            <div className="md:hidden space-y-4">
-              {filteredFiltres.map((filtre) => (
-                <Card key={filtre.id} className="shadow-card">
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <Link
-                            to={`/filtres/${filtre.id}`}
-                            className="text-primary hover:text-primary-hover underline-offset-4 hover:underline font-medium font-mono text-lg"
-                          >
-                            {filtre.referencePrincipale}
-                          </Link>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {filtre.description}
+                </DialogTrigger>
+                <DialogContent className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}>
+                  <DialogHeader>
+                    <DialogTitle>Ajouter un Nouveau Filtre</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="designation">Désignation</Label>
+                      <Input
+                        id="designation"
+                        placeholder="ex: Filtre à huile moteur"
+                        value={newDesignation}
+                        onChange={(e) => {
+                          setNewDesignation(e.target.value);
+                          setErrors({ ...errors, designation: "" });
+                        }}
+                        className={errors.designation ? "border-destructive" : ""}
+                      />
+                      {errors.designation && (
+                        <p className="text-sm text-destructive">
+                          {errors.designation}
+                        </p>
+                      )}
+                    </div>
+                    <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+                      <div className="space-y-2">
+                        <Label htmlFor="reference">Référence Principale</Label>
+                        <Input
+                          id="reference"
+                          placeholder="ex: HF6177"
+                          value={newReference}
+                          onChange={(e) => {
+                            setNewReference(e.target.value);
+                            setErrors({ ...errors, reference: "" });
+                          }}
+                          className={errors.reference ? "border-destructive" : ""}
+                        />
+                        {errors.reference && (
+                          <p className="text-sm text-destructive">
+                            {errors.reference}
                           </p>
-                        </div>
-                        <Badge className={getTypeColor(filtre.type)}>
-                          {filtre.type}
-                        </Badge>
+                        )}
                       </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">
-                            Fabricant:
-                          </span>
-                          <p className="font-medium">{filtre.fabricant}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Prix:</span>
-                          <p className="font-mono font-medium">
-                            {filtre.prixUnitaire.toFixed(2)} DA
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Stock:</span>
-                          <Badge className={getStockStatus(filtre.stock)}>
-                            {filtre.stock} unités
-                          </Badge>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Engins:</span>
-                          <p className="flex items-center gap-1">
-                            <Package className="h-3 w-3" />
-                            {filtre.enginCompatibles}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <div className="flex items-center gap-2">
-                          <LinkIcon className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-sm font-mono">
-                            {filtre.referencesCompatibles.length} réf.
-                          </span>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-6 px-2 text-xs"
-                              >
-                                Voir
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>
-                                  Références Compatibles -{" "}
-                                  {filtre.referencePrincipale}
-                                </DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-2">
-                                {filtre.referencesCompatibles.map(
-                                  (ref, index) => (
-                                    <div
-                                      key={index}
-                                      className="flex items-center justify-between p-2 bg-muted/20 rounded"
-                                    >
-                                      <span className="font-mono">{ref}</span>
-                                      {index === 0 && (
-                                        <Badge
-                                          variant="outline"
-                                          className="text-xs"
-                                        >
-                                          Principal
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  )
-                                )}
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-
-                        <div className="flex gap-1">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="w-[95%] max-w-none">
-                              <DialogHeader>
-                                <DialogTitle>
-                                  Modifier le filtre -{" "}
-                                  {filtre.referencePrincipale}
-                                </DialogTitle>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-ref-mobile">
-                                    Référence Principale
-                                  </Label>
-                                  <Input
-                                    id="edit-ref-mobile"
-                                    defaultValue={filtre.referencePrincipale}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-type-mobile">Type</Label>
-                                  <Select
-                                    defaultValue={filtre.type
-                                      .toLowerCase()
-                                      .replace(" ", "-")}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="huile-moteur">
-                                        Huile moteur
-                                      </SelectItem>
-                                      <SelectItem value="carburant">
-                                        Carburant
-                                      </SelectItem>
-                                      <SelectItem value="air">Air</SelectItem>
-                                      <SelectItem value="hydraulique">
-                                        Hydraulique
-                                      </SelectItem>
-                                      <SelectItem value="transmission">
-                                        Transmission
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-fabricant-mobile">
-                                    Fabricant
-                                  </Label>
-                                  <Input
-                                    id="edit-fabricant-mobile"
-                                    defaultValue={filtre.fabricant}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-prix-mobile">
-                                    Prix Unitaire (DA)
-                                  </Label>
-                                  <Input
-                                    id="edit-prix-mobile"
-                                    type="number"
-                                    step="0.01"
-                                    defaultValue={filtre.prixUnitaire}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-stock-mobile">
-                                    Stock
-                                  </Label>
-                                  <Input
-                                    id="edit-stock-mobile"
-                                    type="number"
-                                    defaultValue={filtre.stock}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-engins-mobile">
-                                    Engins Compatibles
-                                  </Label>
-                                  <Input
-                                    id="edit-engins-mobile"
-                                    type="number"
-                                    defaultValue={filtre.enginCompatibles}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="edit-description-mobile">
-                                    Description
-                                  </Label>
-                                  <Input
-                                    id="edit-description-mobile"
-                                    defaultValue={filtre.description}
-                                  />
-                                </div>
-                              </div>
-                              <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
-                                <DialogClose asChild>
-                                  <Button
-                                    variant="outline"
-                                    className="w-full sm:w-auto"
-                                  >
-                                    Annuler
-                                  </Button>
-                                </DialogClose>
-                                <Button className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
-                                  Sauvegarder
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-destructive border-destructive/20 hover:bg-destructive/10"
-                            onClick={() => handleDeleteFiltre(filtre.id)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="type">Type de Filtre</Label>
+                        <Select
+                          value={newType}
+                          onValueChange={(value) => {
+                            setNewType(value);
+                            setErrors({ ...errors, type: "" });
+                          }}
+                        >
+                          <SelectTrigger className={errors.type ? "border-destructive" : ""}>
+                            <SelectValue placeholder="Sélectionner le type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="hydraulique">Hydraulique</SelectItem>
+                            <SelectItem value="air">Air</SelectItem>
+                            <SelectItem value="carburant">Carburant</SelectItem>
+                            <SelectItem value="huile">Huile</SelectItem>
+                            <SelectItem value="transmission">Transmission</SelectItem>
+                            <SelectItem value="cabine">Cabine</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {errors.type && (
+                          <p className="text-sm text-destructive">{errors.type}</p>
+                        )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+                      <div className="space-y-2">
+                        <Label htmlFor="fabricant">Fabricant</Label>
+                        <Input
+                          id="fabricant"
+                          placeholder="ex: Caterpillar, Fleetguard..."
+                          value={newFabricant}
+                          onChange={(e) => {
+                            setNewFabricant(e.target.value);
+                            setErrors({ ...errors, fabricant: "" });
+                          }}
+                          className={errors.fabricant ? "border-destructive" : ""}
+                        />
+                        {errors.fabricant && (
+                          <p className="text-sm text-destructive">
+                            {errors.fabricant}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="prix">Prix Unitaire (DA)</Label>
+                        <Input
+                          id="prix"
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          value={newPrix}
+                          onChange={(e) => {
+                            setNewPrix(e.target.value);
+                            setErrors({ ...errors, prix: "" });
+                          }}
+                          className={errors.prix ? "border-destructive" : ""}
+                        />
+                        {errors.prix && (
+                          <p className="text-sm text-destructive">{errors.prix}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="stock">Stock Initial</Label>
+                      <Input
+                        id="stock"
+                        type="number"
+                        placeholder="0"
+                        value={newStock}
+                        onChange={(e) => {
+                          setNewStock(e.target.value);
+                          setErrors({ ...errors, stock: "" });
+                        }}
+                        className={errors.stock ? "border-destructive" : ""}
+                      />
+                      {errors.stock && (
+                        <p className="text-sm text-destructive">{errors.stock}</p>
+                      )}
+                    </div>
+                  </div>
+                  <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                    <DialogClose asChild>
+                      <Button variant="outline" className="w-full sm:w-auto">
+                        Annuler
+                      </Button>
+                    </DialogClose>
+                    <Button
+                      className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
+                      onClick={handleAddFiltre}
+                    >
+                      Ajouter
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Animated Search Section */}
+          <Card className="shadow-vibrant bg-gradient-card border-0 overflow-hidden animate-fade-in">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row gap-4 items-center">
+                <div className="relative flex-1 w-full">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary animate-pulse" />
+                  <Input
+                    placeholder="Rechercher par référence, type, fabricant..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-12 h-12 text-lg border-primary/20 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:shadow-glow"
+                  />
+                </div>
+                <Select>
+                  <SelectTrigger className="w-full lg:w-56 h-12 border-accent/20 focus:border-accent hover:shadow-vibrant transition-all duration-300">
+                    <SelectValue placeholder="Filtrer par type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gradient-card">
+                    <SelectItem value="all">Tous les types</SelectItem>
+                    <SelectItem value="hydraulique">🔧 Hydraulique</SelectItem>
+                    <SelectItem value="air">💨 Air</SelectItem>
+                    <SelectItem value="carburant">⛽ Carburant</SelectItem>
+                    <SelectItem value="huile">🛢️ Huile</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Animated Filters Grid */}
+          <Card className="shadow-glow bg-gradient-card border-0 overflow-hidden animate-fade-in">
+            <CardHeader className="bg-gradient-rainbow text-white">
+              <CardTitle className="flex items-center gap-3 text-2xl">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                  <Package className="h-6 w-6" />
+                </div>
+                Catalogue des Filtres ({filteredFiltres.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              {/* Modern Grid Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredFiltres.map((filtre, index) => (
+                  <div 
+                    key={filtre.id}
+                    className="group relative bg-white rounded-2xl p-6 shadow-card hover:shadow-vibrant transition-all duration-500 hover:scale-105 animate-scale-in border border-primary/5 hover:border-primary/20"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    {/* Gradient Background Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10">
+                      {/* Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getTypeColor(filtre.type)}`}>
+                            {filtre.type === "Hydraulique" && "🔧"}
+                            {filtre.type === "Air" && "💨"}
+                            {filtre.type === "Carburant" && "⛽"}
+                            {filtre.type === "Huile" && "🛢️"}
+                          </div>
+                          <div>
+                            <Link
+                              to={`/filtres/${filtre.id}`}
+                              className="text-lg font-bold text-primary hover:text-primary-hover transition-colors duration-200 hover:underline"
+                            >
+                              {filtre.referencePrincipale}
+                            </Link>
+                            <Badge 
+                              className={`ml-2 ${getTypeColor(filtre.type)} text-xs animate-pulse`}
+                            >
+                              {filtre.type}
+                            </Badge>
+                          </div>
+                        </div>
+                        <Badge className={`${getStockStatus(filtre.stock)} animate-pulse`}>
+                          {filtre.stock}
+                        </Badge>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
+                        {filtre.description}
+                      </p>
+
+                      {/* Manufacturer & Price */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-foreground">{filtre.fabricant}</span>
+                        </div>
+                        <div className="flex items-center gap-2 bg-success/10 px-3 py-1 rounded-full">
+                          <Euro className="h-4 w-4 text-success" />
+                          <span className="font-bold text-success">{filtre.prixUnitaire.toFixed(2)} DA</span>
+                        </div>
+                      </div>
+
+                      {/* Compatibility References */}
+                      <div className="mb-4">
+                        <p className="text-xs text-muted-foreground mb-2">Références compatibles:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {filtre.referencesCompatibles.slice(0, 3).map((ref, idx) => (
+                            <Badge
+                              key={ref}
+                              variant="outline"
+                              className="text-xs font-mono bg-primary/5 border-primary/20 text-primary"
+                              style={{ animationDelay: `${idx * 50}ms` }}
+                            >
+                              {ref}
+                            </Badge>
+                          ))}
+                          {filtre.referencesCompatibles.length > 3 && (
+                            <Badge variant="outline" className="text-xs bg-accent/10 border-accent/20 text-accent">
+                              +{filtre.referencesCompatibles.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Engine Compatibility */}
+                      <div className="flex items-center gap-2 mb-4 p-2 bg-muted/30 rounded-lg">
+                        <Package className="h-4 w-4 text-primary" />
+                        <span className="text-sm text-foreground">
+                          Compatible avec <span className="font-bold text-primary">{filtre.enginCompatibles}</span> engins
+                        </span>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 bg-accent/10 text-accent border-accent/20 hover:bg-accent hover:text-accent-foreground transition-all duration-300 hover:scale-105"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Modifier
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteFiltre(filtre.id)}
+                          className="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive hover:text-destructive-foreground transition-all duration-300 hover:scale-105"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Empty State */}
+              {filteredFiltres.length === 0 && (
+                <div className="text-center py-16 animate-fade-in">
+                  <div className="w-24 h-24 mx-auto mb-4 bg-gradient-vibrant rounded-full flex items-center justify-center">
+                    <Filter className="h-12 w-12 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground mb-2">Aucun filtre trouvé</h3>
+                  <p className="text-muted-foreground">Essayez de modifier vos critères de recherche</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
