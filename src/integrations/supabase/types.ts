@@ -163,6 +163,81 @@ export type Database = {
         }
         Relationships: []
       }
+      gammes_entretien: {
+        Row: {
+          created_at: string | null
+          gamme: string
+          heures_interval: number
+          id: number
+          sequence_order: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          gamme: string
+          heures_interval: number
+          id?: number
+          sequence_order: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          gamme?: string
+          heures_interval?: number
+          id?: number
+          sequence_order?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      maintenance_preventive: {
+        Row: {
+          created_at: string | null
+          date_execution: string | null
+          engin_id: number | null
+          filtres_remplaces: number[] | null
+          gamme_id: number | null
+          heures_service: number
+          id: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_execution?: string | null
+          engin_id?: number | null
+          filtres_remplaces?: number[] | null
+          gamme_id?: number | null
+          heures_service: number
+          id?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_execution?: string | null
+          engin_id?: number | null
+          filtres_remplaces?: number[] | null
+          gamme_id?: number | null
+          heures_service?: number
+          id?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_preventive_engin_id_fkey"
+            columns: ["engin_id"]
+            isOneToOne: false
+            referencedRelation: "engins"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_preventive_gamme_id_fkey"
+            columns: ["gamme_id"]
+            isOneToOne: false
+            referencedRelation: "gammes_entretien"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
