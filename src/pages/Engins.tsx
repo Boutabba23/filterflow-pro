@@ -21,42 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-<<<<<<< HEAD
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Wrench,
-  Calendar,
-  MapPin,
-  HourglassIcon,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import {
-=======
->>>>>>> a87fe9648a27cc715c1ad5dcd3d4acbd7c996438
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-<<<<<<< HEAD
-import { EnginCard } from "@/components/engins/EnginCard";
-import { supabase } from "@/lib/database";
-import { toast } from "@/components/ui/use-toast";
-import {
-  createEngin,
-  deleteEngin,
-  fetchEngins,
-  updateEngin,
-} from "@/lib/database-utils";
-=======
-import {
   Plus,
   Search,
   Edit,
@@ -68,10 +32,28 @@ import {
   Building2,
   Cog,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { EnginCard } from "@/components/engins/EnginCard";
+import { supabase } from "@/lib/database";
+import { toast } from "@/components/ui/use-toast";
+import {
+  createEngin,
+  deleteEngin,
+  fetchEngins,
+  updateEngin,
+} from "@/lib/database-utils";
 import { useIsMobile } from "@/hooks/use-mobile";
->>>>>>> a87fe9648a27cc715c1ad5dcd3d4acbd7c996438
 
 export default function Engins() {
   const isMobile = useIsMobile();
@@ -110,7 +92,6 @@ export default function Engins() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Mock data - sera remplacé par les données Supabase
-<<<<<<< HEAD
   const [engins, setEngins] = useState([]);
   const [loading, setLoading] = useState(true);
   // Fetch data on component mount
@@ -132,41 +113,6 @@ export default function Engins() {
       setLoading(false);
     }
   };
-=======
-  const [engins, setEngins] = useState([
-    {
-      id: 1,
-      code: "A03010236",
-      désignation: "BULL SUR CHENILLE",
-      marque: "Caterpillar",
-      type: "D8R",
-      heures: 2450,
-      statut: "Actif",
-      derniereMaintenancePréventive: "2024-01-15",
-    },
-    {
-      id: 2,
-      code: "A01020672",
-      désignation: "PELLE SUR CHENILLE",
-      marque: "LIBHERR",
-      type: "R944CL",
-      heures: 5450,
-      statut: "Actif",
-      derniereMaintenancePréventive: "2024-04-15",
-    },
-    {
-      id: 3,
-      code: "A05030891",
-      désignation: "CHARGEUSE SUR PNEUS",
-      marque: "Caterpillar",
-      type: "950M",
-      heures: 3200,
-      statut: "Maintenance",
-      derniereMaintenancePréventive: "2024-02-20",
-    },
-  ]);
-
->>>>>>> a87fe9648a27cc715c1ad5dcd3d4acbd7c996438
   const filteredEngins = engins.filter(
     (engin) =>
       engin.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -239,7 +185,6 @@ export default function Engins() {
         type: formData.type,
         heures: Number(formData.heures),
 
-<<<<<<< HEAD
         filtres: undefined,
         derniere_maintenance_preventive: "",
       });
@@ -258,18 +203,6 @@ export default function Engins() {
         variant: "destructive",
       });
     }
-=======
-    setEngins([...engins, newEngin]);
-    setFormData({
-      code: "",
-      désignation: "",	
-      marque: "",
-      type: "",
-      heures: 0,
-    });
-    setErrors({});
-    setAddDialogOpen(false);
->>>>>>> a87fe9648a27cc715c1ad5dcd3d4acbd7c996438
   };
 
   // Update handleSaveEdit
@@ -373,7 +306,7 @@ export default function Engins() {
               </p>
               <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button 
+                  <Button
                     size="lg"
                     className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-vibrant animate-scale-in"
                   >
@@ -381,12 +314,18 @@ export default function Engins() {
                     Nouvel Engin
                   </Button>
                 </DialogTrigger>
-                <DialogContent className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}>
+                <DialogContent
+                  className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}
+                >
                   <DialogHeader>
                     <DialogTitle>Ajouter un Nouvel Engin</DialogTitle>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
-                    <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+                    <div
+                      className={`${
+                        isMobile ? "grid grid-cols-1" : "grid grid-cols-2"
+                      } gap-4`}
+                    >
                       <div className="space-y-2">
                         <Label htmlFor="code">Code</Label>
                         <Input
@@ -397,7 +336,9 @@ export default function Engins() {
                           className={errors.code ? "border-destructive" : ""}
                         />
                         {errors.code && (
-                          <p className="text-sm text-destructive">{errors.code}</p>
+                          <p className="text-sm text-destructive">
+                            {errors.code}
+                          </p>
                         )}
                       </div>
                       <div className="space-y-2">
@@ -407,7 +348,9 @@ export default function Engins() {
                           placeholder="ex: BULL SUR CHENILLE"
                           value={formData.désignation}
                           onChange={handleInputChange}
-                          className={errors.désignation ? "border-destructive" : ""}
+                          className={
+                            errors.désignation ? "border-destructive" : ""
+                          }
                         />
                         {errors.désignation && (
                           <p className="text-sm text-destructive">
@@ -416,7 +359,11 @@ export default function Engins() {
                         )}
                       </div>
                     </div>
-                    <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+                    <div
+                      className={`${
+                        isMobile ? "grid grid-cols-1" : "grid grid-cols-2"
+                      } gap-4`}
+                    >
                       <div className="space-y-2">
                         <Label htmlFor="marque">Marque</Label>
                         <Input
@@ -442,7 +389,9 @@ export default function Engins() {
                           className={errors.type ? "border-destructive" : ""}
                         />
                         {errors.type && (
-                          <p className="text-sm text-destructive">{errors.type}</p>
+                          <p className="text-sm text-destructive">
+                            {errors.type}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -523,14 +472,14 @@ export default function Engins() {
               {/* Modern Grid Layout */}
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredEngins.map((engin, index) => (
-                  <div 
+                  <div
                     key={engin.id}
                     className="group relative bg-white dark:bg-card rounded-2xl p-6 shadow-card hover:shadow-vibrant transition-all duration-500 hover:scale-105 animate-scale-in border border-primary/5 hover:border-primary/20"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     {/* Gradient Background Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    
+
                     {/* Content */}
                     <div className="relative z-10">
                       {/* Header */}
@@ -546,8 +495,10 @@ export default function Engins() {
                             >
                               {engin.code}
                             </Link>
-                            <Badge 
-                              className={`ml-2 ${getStatusColor(engin.statut)} text-xs animate-pulse`}
+                            <Badge
+                              className={`ml-2 ${getStatusColor(
+                                engin.statut
+                              )} text-xs animate-pulse`}
                             >
                               {engin.statut}
                             </Badge>
@@ -557,8 +508,13 @@ export default function Engins() {
 
                       {/* Description & Type */}
                       <div className="mb-4">
-                        <h3 className="font-semibold text-foreground mb-1">{engin.désignation}</h3>
-                        <Badge variant="outline" className="text-xs bg-accent/10 border-accent/20 text-accent">
+                        <h3 className="font-semibold text-foreground mb-1">
+                          {engin.désignation}
+                        </h3>
+                        <Badge
+                          variant="outline"
+                          className="text-xs bg-accent/10 border-accent/20 text-accent"
+                        >
                           {engin.type}
                         </Badge>
                       </div>
@@ -567,11 +523,15 @@ export default function Engins() {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-foreground">{engin.marque}</span>
+                          <span className="font-medium text-foreground">
+                            {engin.marque}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2 bg-success/10 px-3 py-1 rounded-full">
                           <HourglassIcon className="h-4 w-4 text-success" />
-                          <span className="font-bold text-success">{engin.heures.toLocaleString()}h</span>
+                          <span className="font-bold text-success">
+                            {engin.heures.toLocaleString()}h
+                          </span>
                         </div>
                       </div>
 
@@ -579,8 +539,11 @@ export default function Engins() {
                       <div className="flex items-center gap-2 mb-4 p-2 bg-muted/30 rounded-lg">
                         <Calendar className="h-4 w-4 text-primary" />
                         <span className="text-sm text-foreground">
-                          Dernière maintenance: <span className="font-bold text-primary">
-                            {new Date(engin.derniereMaintenancePréventive).toLocaleDateString("fr-FR")}
+                          Dernière maintenance:{" "}
+                          <span className="font-bold text-primary">
+                            {new Date(
+                              engin.derniereMaintenancePréventive
+                            ).toLocaleDateString("fr-FR")}
                           </span>
                         </span>
                       </div>
@@ -616,8 +579,12 @@ export default function Engins() {
                   <div className="w-24 h-24 mx-auto mb-4 bg-gradient-vibrant rounded-full flex items-center justify-center">
                     <Wrench className="h-12 w-12 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">Aucun engin trouvé</h3>
-                  <p className="text-muted-foreground">Essayez de modifier vos critères de recherche</p>
+                  <h3 className="text-xl font-bold text-foreground mb-2">
+                    Aucun engin trouvé
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Essayez de modifier vos critères de recherche
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -627,14 +594,18 @@ export default function Engins() {
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}>
+        <DialogContent
+          className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}
+        >
           <DialogHeader>
-            <DialogTitle>
-              Modifier l'engin - {currentEngin?.code}
-            </DialogTitle>
+            <DialogTitle>Modifier l'engin - {currentEngin?.code}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+            <div
+              className={`${
+                isMobile ? "grid grid-cols-1" : "grid grid-cols-2"
+              } gap-4`}
+            >
               <div className="space-y-2">
                 <Label htmlFor="edit-code">Code Engin</Label>
                 <Input
@@ -652,7 +623,11 @@ export default function Engins() {
                 />
               </div>
             </div>
-            <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+            <div
+              className={`${
+                isMobile ? "grid grid-cols-1" : "grid grid-cols-2"
+              } gap-4`}
+            >
               <div className="space-y-2">
                 <Label htmlFor="edit-marque">Marque</Label>
                 <Input
