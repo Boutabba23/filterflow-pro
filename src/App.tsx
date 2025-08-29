@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
 import Index from "./pages/Index";
 import Engins from "./pages/Engins";
 import Filtres from "./pages/Filtres";
@@ -15,7 +15,7 @@ import FilterDetails from "./pages/FilterDetails";
 const queryClient = new QueryClient();
 
 const App = () => (
-<<<<<<< HEAD
+<>
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -36,7 +36,7 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
   </ErrorBoundary>
-=======
+
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -53,7 +53,8 @@ const App = () => (
       </Routes>
     </TooltipProvider>
   </QueryClientProvider>
->>>>>>> a87fe9648a27cc715c1ad5dcd3d4acbd7c996438
+
+</>
 );
 
 export default App;
