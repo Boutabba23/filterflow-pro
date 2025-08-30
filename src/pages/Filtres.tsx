@@ -151,8 +151,8 @@ const Filtres = () => {
 
   const filteredFiltres = filtres.filter(
     (filtre) =>
-      (filtre.reference_principale &&
-        filtre.reference_principale
+      (filtre.referencePrincipale &&
+        filtre.referencePrincipale
           .toLowerCase()
           .includes(searchTerm.toLowerCase())) ||
       (filtre.type &&
@@ -225,14 +225,15 @@ const Filtres = () => {
     };
 
     const newItem = {
-      reference_principale: newReference.trim(),
+      id: Date.now(),
+      referencePrincipale: newReference.trim(),
       type: typeMap[newType] || newType || "Hydraulique",
       fabricant: newFabricant.trim(),
-      description: newDesignation.trim(),
-      references_compatibles: [],
-      engin_compatibles: selectedEngins.length,
+
+      referencesCompatibles: [],
+      enginCompatibles: selectedEngins.length,
       stock: Number(newStock) || 0,
-      prix_unitaire: Number(newPrix) || 0,
+      prixUnitaire: Number(newPrix) || 0,
     };
 
     setFiltres((prev) => [newItem, ...prev]);
@@ -657,7 +658,7 @@ const Filtres = () => {
                                 className="text-lg font-bold text-primary hover:text-primary-hover
                                  transition-colors duration-200 hover:underline"
                               >
-                                {filtre.reference_principale || "N/A"}
+                                {filtre.referencePrincipale || "N/A"}
                               </Link>
                               <Badge
                                 className={`ml-2 ${getTypeColor(
@@ -675,7 +676,7 @@ const Filtres = () => {
                               onClick={() => {
                                 setEditFiltre(filtre);
                                 setEditReference(
-                                  filtre.reference_principale || ""
+                                  filtre.referencePrincipale || ""
                                 );
                                 setEditType(
                                   Object.entries({
@@ -692,7 +693,7 @@ const Filtres = () => {
                                 setEditFabricant(filtre.fabricant || "");
                                 setEditDesignation(filtre.description || "");
                                 setEditPrix(
-                                  (filtre.prix_unitaire || 0).toString()
+                                  (filtre.prixUnitaire || 0).toString()
                                 );
                                 setEditStock((filtre.stock || 0).toString());
                                 // Initialiser les engins sélectionnés pour l'édition
@@ -729,7 +730,7 @@ const Filtres = () => {
                                 Engins compatibles
                               </p>
                               <p className="font-medium">
-                                {filtre.engin_compatibles || 0} modeles
+                                {filtre.enginCompatibles || 0} modeles
                               </p>
                             </div>
                           </div>
@@ -747,8 +748,8 @@ const Filtres = () => {
                                 Prix
                               </p>
                               <p className="font-medium">
-                                {filtre.prix_unitaire
-                                  ? filtre.prix_unitaire.toFixed(2)
+                                {filtre.prixUnitaire
+                                  ? filtre.prixUnitaire.toFixed(2)
                                   : "0.00"}{" "}
                                 DA
                               </p>
