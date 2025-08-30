@@ -464,10 +464,19 @@ export default function Engins() {
           </Card>
 
           {/* Animated Engins Grid */}
-          <Card className="shadow-glow bg-gradient-card border-0 overflow-hidden animate-fade-in">
-            <CardHeader className="bg-gradient-rainbow text-white">
+          <Card
+            className="shadow-glow bg-gradient-card 
+          border-0 overflow-hidden animate-fade-in"
+          >
+            <CardHeader
+              className="bg-gradient-rainbow 
+            text-white"
+            >
               <CardTitle className="flex items-center gap-3 text-2xl">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+                <div
+                  className="w-10 h-10 bg-white/20 rounded-full 
+                flex items-center justify-center animate-pulse"
+                >
                   <Cog className="h-6 w-6" />
                 </div>
                 Parc d'Engins ({filteredEngins.length})
@@ -475,11 +484,18 @@ export default function Engins() {
             </CardHeader>
             <CardContent className="p-6">
               {/* Modern Grid Layout */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div
+                className="grid grid-cols-1
+               md:grid-cols-2 xl:grid-cols-3 gap-6"
+              >
                 {filteredEngins.map((engin, index) => (
                   <div
                     key={engin.id}
-                    className="group relative bg-white dark:bg-card rounded-2xl p-6 shadow-card hover:shadow-vibrant transition-all duration-500 hover:scale-105 animate-scale-in border border-primary/5 hover:border-primary/20"
+                    className="group relative bg-white dark:bg-card 
+                    rounded-2xl p-6 shadow-card hover:shadow-vibrant 
+                    transition-all duration-500 hover:scale-105 
+                    animate-scale-in border border-primary/5
+                    hover:border-primary/20"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     {/* Gradient Background Overlay */}

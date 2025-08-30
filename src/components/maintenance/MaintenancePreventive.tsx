@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Wrench, Clock, AlertTriangle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/database";
 import { useToast } from "@/hooks/use-toast";
 
 interface Engin {
@@ -75,7 +75,6 @@ export function MaintenancePreventive() {
   const [selectedFiltres, setSelectedFiltres] = useState<number[]>([]);
   const [heuresService, setHeuresService] = useState("");
   const [dateGamme, setDateGamme] = useState("");
-  const [gammeExecutee, setGammeExecutee] = useState("");
 
   // Edit mode state
   const [editingRecordId, setEditingRecordId] = useState<number | null>(null);
@@ -207,8 +206,7 @@ export function MaintenancePreventive() {
             engin_id: parseInt(selectedEngin),
             gamme_id: parseInt(selectedGamme),
             heures_service: parseInt(heuresService),
-            date_gamme: dateGamme,
-            gamme_executee: gammeExecutee,
+            date_execution: dateGamme,
             filtres_remplaces: selectedFiltres,
           })
           .eq("id", editingRecordId);
@@ -225,8 +223,7 @@ export function MaintenancePreventive() {
           engin_id: parseInt(selectedEngin),
           gamme_id: parseInt(selectedGamme),
           heures_service: parseInt(heuresService),
-          date_gamme: dateGamme,
-          gamme_executee: gammeExecutee,
+          date_execution: dateGamme,
           filtres_remplaces: selectedFiltres,
         });
 
@@ -244,7 +241,6 @@ export function MaintenancePreventive() {
       setSelectedFiltres([]);
       setHeuresService("");
       setDateGamme("");
-      setGammeExecutee("");
       setEditingRecordId(null);
       setDialogOpen(false);
       fetchData();
@@ -515,13 +511,11 @@ export function MaintenancePreventive() {
                                 setSelectedGamme(
                                   lastMaintenance.gamme_id.toString()
                                 );
-                                setDateGamme(lastMaintenance.date_gamme || "");
+                                setDateGamme(lastMaintenance.date_execution || "");
                                 setHeuresService(
                                   lastMaintenance.heures_service.toString()
                                 );
-                                setGammeExecutee(
-                                  lastMaintenance.gamme_executee || ""
-                                );
+
                                 setSelectedFiltres(
                                   lastMaintenance.filtres_remplaces || []
                                 );

@@ -238,6 +238,36 @@ export type Database = {
           },
         ]
       }
+      maintenances: {
+        Row: {
+          id: number
+          created_at: string | null
+          updated_at: string | null
+          engin_code: string
+          type_maintenance: string
+          date_maintenance: string
+          description: string
+        }
+        Insert: {
+          id?: number
+          created_at?: string | null
+          updated_at?: string | null
+          engin_code: string
+          type_maintenance: string
+          date_maintenance: string
+          description: string
+        }
+        Update: {
+          id?: number
+          created_at?: string | null
+          updated_at?: string | null
+          engin_code?: string
+          type_maintenance?: string
+          date_maintenance?: string
+          description?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
