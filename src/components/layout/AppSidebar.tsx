@@ -1,4 +1,4 @@
-import { Settings, BarChart3 } from "lucide-react";
+import { Settings, BarChart3, Wrench } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import filterImage from "@/images/filter.png";
 import pelleImage from "@/images/excavator.png";
@@ -30,6 +30,11 @@ const items = [
     url: "/filtres",
     icon: "image",
     image: filterImage,
+  },
+  {
+    title: "Maintenance",
+    url: "/maintenance",
+    icon: Wrench,
   },
   {
     title: "Configuration",

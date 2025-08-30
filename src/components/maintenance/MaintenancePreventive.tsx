@@ -68,18 +68,25 @@ export function MaintenancePreventive() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
-  
+
   // Form states
   const [selectedEngin, setSelectedEngin] = useState("");
   const [selectedGamme, setSelectedGamme] = useState("");
   const [selectedFiltres, setSelectedFiltres] = useState<number[]>([]);
   const [heuresService, setHeuresService] = useState("");
-  
+  const [dateGamme, setDateGamme] = useState("");
+  const [gammeExecutee, setGammeExecutee] = useState("");
+
+  // Edit mode state
+  const [editingRecordId, setEditingRecordId] = useState<number | null>(null);
+
   // Data states
   const [engins, setEngins] = useState<Engin[]>([]);
   const [filtres, setFiltres] = useState<Filtre[]>([]);
   const [gammes, setGammes] = useState<GammeEntretien[]>([]);
-  const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceRecord[]>([]);
+  const [maintenanceRecords, setMaintenanceRecords] = useState<
+    MaintenanceRecord[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch data on component mount
@@ -90,21 +97,24 @@ export function MaintenancePreventive() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch all necessary data
-      const [enginsRes, filtresRes, gammesRes, maintenanceRes] = await Promise.all([
-        supabase.from('engins').select('*').order('code'),
-        supabase.from('filtres').select('*').order('reference_principale'),
-        supabase.from('gammes_entretien').select('*').order('sequence_order'),
-        supabase
-          .from('maintenance_preventive')
-          .select(`
+      const [enginsRes, filtresRes, gammesRes, maintenanceRes] =
+        await Promise.all([
+          supabase.from("engins").select("*").order("code"),
+          supabase.from("filtres").select("*").order("reference_principale"),
+          supabase.from("gammes_entretien").select("*").order("sequence_order"),
+          supabase
+            .from("maintenance_preventive")
+            .select(
+              `
             *,
             engin:engins(*),
             gamme:gammes_entretien(*)
-          `)
-          .order('date_execution', { ascending: false })
-      ]);
+          `
+            )
+            .order("date_execution", { ascending: false }),
+        ]);
 
       if (enginsRes.error) throw enginsRes.error;
       if (filtresRes.error) throw filtresRes.error;
@@ -116,7 +126,7 @@ export function MaintenancePreventive() {
       setGammes(gammesRes.data || []);
       setMaintenanceRecords(maintenanceRes.data || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
       toast({
         title: "Erreur",
         description: "Impossible de charger les données",
@@ -131,19 +141,29 @@ export function MaintenancePreventive() {
     const enginMaintenances = maintenanceRecords.filter(
       (record) => record.engin.id === enginId
     );
-    
+
     if (enginMaintenances.length === 0) {
       // Premier entretien, commencer par C (sequence_order = 1)
-      return gammes.find(g => g.sequence_order === 1) || null;
+      return gammes.find((g) => g.sequence_order === 1) || null;
     }
 
     // Trouver la dernière maintenance
     const lastMaintenance = enginMaintenances[0]; // Déjà trié par date desc
     const lastSequence = lastMaintenance.gamme.sequence_order;
-    
-    // Trouver la prochaine gamme dans le cycle
-    const nextSequence = lastSequence >= 8 ? 1 : lastSequence + 1;
-    return gammes.find(g => g.sequence_order === nextSequence) || null;
+
+    // Définir la séquence personnalisée: C(1),D(2),C(3),E(4),C(5),D(6),C(7),F(8)
+    const customSequence = [1, 2, 1, 4, 1, 2, 1, 8]; // Correspond à C,D,C,E,C,D,C,F
+
+    // Trouver la position actuelle dans la séquence personnalisée
+    const currentPosition = customSequence.indexOf(lastSequence);
+
+    // Calculer la prochaine position dans la séquence
+    const nextPosition = (currentPosition + 1) % customSequence.length;
+
+    // Obtenir le sequence_order de la prochaine gamme
+    const nextSequence = customSequence[nextPosition];
+
+    return gammes.find((g) => g.sequence_order === nextSequence) || null;
   };
 
   const calculateRemainingHours = (engin: Engin): number => {
@@ -155,20 +175,21 @@ export function MaintenancePreventive() {
     );
 
     if (enginMaintenances.length === 0) {
-      // Premier entretien à nextGamme.heures_interval
-      return Math.max(0, nextGamme.heures_interval - engin.heures);
+      // Premier entretien à 250h
+      return Math.max(0, 250 - engin.heures);
     }
 
     // Calculer les heures depuis la dernière maintenance
     const lastMaintenance = enginMaintenances[0];
     const heuresDepuisDerniere = engin.heures - lastMaintenance.heures_service;
-    const intervalleProchaine = nextGamme.heures_interval - lastMaintenance.gamme.heures_interval;
-    
+    // Intervalle constant de 250h entre chaque gamme
+    const intervalleProchaine = 250;
+
     return Math.max(0, intervalleProchaine - heuresDepuisDerniere);
   };
 
   const handleAddMaintenance = async () => {
-    if (!selectedEngin || !selectedGamme || !heuresService) {
+    if (!selectedEngin || !selectedGamme || !heuresService || !dateGamme) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs obligatoires",
@@ -178,34 +199,62 @@ export function MaintenancePreventive() {
     }
 
     try {
-      const { error } = await supabase
-        .from('maintenance_preventive')
-        .insert({
+      if (editingRecordId) {
+        // Update existing record
+        const { error } = await supabase
+          .from("maintenance_preventive")
+          .update({
+            engin_id: parseInt(selectedEngin),
+            gamme_id: parseInt(selectedGamme),
+            heures_service: parseInt(heuresService),
+            date_gamme: dateGamme,
+            gamme_executee: gammeExecutee,
+            filtres_remplaces: selectedFiltres,
+          })
+          .eq("id", editingRecordId);
+
+        if (error) throw error;
+
+        toast({
+          title: "Succès",
+          description: "Maintenance mise à jour avec succès",
+        });
+      } else {
+        // Create new record
+        const { error } = await supabase.from("maintenance_preventive").insert({
           engin_id: parseInt(selectedEngin),
           gamme_id: parseInt(selectedGamme),
           heures_service: parseInt(heuresService),
+          date_gamme: dateGamme,
+          gamme_executee: gammeExecutee,
           filtres_remplaces: selectedFiltres,
         });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Succès",
-        description: "Maintenance enregistrée avec succès",
-      });
+        toast({
+          title: "Succès",
+          description: "Maintenance enregistrée avec succès",
+        });
+      }
 
       // Reset form and refresh data
       setSelectedEngin("");
       setSelectedGamme("");
       setSelectedFiltres([]);
       setHeuresService("");
+      setDateGamme("");
+      setGammeExecutee("");
+      setEditingRecordId(null);
       setDialogOpen(false);
       fetchData();
     } catch (error) {
-      console.error('Error adding maintenance:', error);
+      console.error("Error saving maintenance:", error);
       toast({
         title: "Erreur",
-        description: "Impossible d'enregistrer la maintenance",
+        description: editingRecordId
+          ? "Impossible de mettre à jour la maintenance"
+          : "Impossible d'enregistrer la maintenance",
         variant: "destructive",
       });
     }
@@ -216,15 +265,18 @@ export function MaintenancePreventive() {
     if (remainingHours === 0) {
       return <Badge variant="destructive">Maintenance Due</Badge>;
     } else if (remainingHours <= 50) {
-      return <Badge className="bg-warning text-warning-foreground">Proche</Badge>;
+      return (
+        <Badge className="bg-warning text-warning-foreground">Proche</Badge>
+      );
     }
     return <Badge variant="secondary">À jour</Badge>;
   };
 
-  const filteredEngins = engins.filter(engin =>
-    engin.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    engin.marque.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    engin.type.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEngins = engins.filter(
+    (engin) =>
+      engin.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      engin.marque.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      engin.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -257,15 +309,24 @@ export function MaintenancePreventive() {
               Nouvelle Maintenance
             </Button>
           </DialogTrigger>
-          <DialogContent className={isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}>
+          <DialogContent
+            className={isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}
+          >
             <DialogHeader>
-              <DialogTitle>Enregistrer une Maintenance Exécutée</DialogTitle>
+              <DialogTitle>
+                {editingRecordId
+                  ? "Modifier une Maintenance Exécutée"
+                  : "Enregistrer une Maintenance Exécutée"}
+              </DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Code Engin</Label>
-                  <Select value={selectedEngin} onValueChange={setSelectedEngin}>
+                  <Select
+                    value={selectedEngin}
+                    onValueChange={setSelectedEngin}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner un engin" />
                     </SelectTrigger>
@@ -280,7 +341,10 @@ export function MaintenancePreventive() {
                 </div>
                 <div className="space-y-2">
                   <Label>Gamme à Exécuter</Label>
-                  <Select value={selectedGamme} onValueChange={setSelectedGamme}>
+                  <Select
+                    value={selectedGamme}
+                    onValueChange={setSelectedGamme}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner une gamme" />
                     </SelectTrigger>
@@ -304,6 +368,15 @@ export function MaintenancePreventive() {
                 />
               </div>
               <div className="space-y-2">
+                <Label>Date de Gamme</Label>
+                <Input
+                  type="date"
+                  value={dateGamme}
+                  onChange={(e) => setDateGamme(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label>Filtres à Remplacer (optionnel)</Label>
                 <Select>
                   <SelectTrigger>
@@ -323,9 +396,7 @@ export function MaintenancePreventive() {
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Annuler
               </Button>
-              <Button onClick={handleAddMaintenance}>
-                Enregistrer
-              </Button>
+              <Button onClick={handleAddMaintenance}>Enregistrer</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -348,19 +419,24 @@ export function MaintenancePreventive() {
                   <TableHead>Marque</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Prochaine Gamme</TableHead>
+                  <TableHead>Date de Gamme</TableHead>
+                  <TableHead>Gamme Éxecutée</TableHead>
                   <TableHead>Heures Service</TableHead>
                   <TableHead>Heures Restantes</TableHead>
                   <TableHead>Statut</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredEngins.map((engin) => {
                   const nextGamme = getNextGamme(engin.id);
                   const remainingHours = calculateRemainingHours(engin);
-                  
+
                   return (
                     <TableRow key={engin.id}>
-                      <TableCell className="font-medium">{engin.code}</TableCell>
+                      <TableCell className="font-medium">
+                        {engin.code}
+                      </TableCell>
                       <TableCell>{engin.marque}</TableCell>
                       <TableCell>{engin.type}</TableCell>
                       <TableCell>
@@ -371,6 +447,33 @@ export function MaintenancePreventive() {
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        {engin.derniere_maintenance_preventive ? (
+                          new Date(
+                            engin.derniere_maintenance_preventive
+                          ).toLocaleDateString("fr-FR")
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const lastMaintenance = maintenanceRecords
+                            .filter((record) => record.engin_id === engin.id)
+                            .sort(
+                              (a, b) =>
+                                new Date(b.date_execution).getTime() -
+                                new Date(a.date_execution).getTime()
+                            )[0];
+
+                          if (lastMaintenance && lastMaintenance.gamme) {
+                            return `Gamme ${lastMaintenance.gamme.gamme}`;
+                          }
+                          return (
+                            <span className="text-muted-foreground">-</span>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
@@ -387,6 +490,102 @@ export function MaintenancePreventive() {
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(engin)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              // Récupérer le dernier enregistrement de maintenance pour cet engin
+                              const lastMaintenance = maintenanceRecords
+                                .filter(
+                                  (record) => record.engin_id === engin.id
+                                )
+                                .sort(
+                                  (a, b) =>
+                                    new Date(b.date_execution).getTime() -
+                                    new Date(a.date_execution).getTime()
+                                )[0];
+
+                              if (lastMaintenance) {
+                                setEditingRecordId(lastMaintenance.id);
+                                setSelectedEngin(
+                                  lastMaintenance.engin_id.toString()
+                                );
+                                setSelectedGamme(
+                                  lastMaintenance.gamme_id.toString()
+                                );
+                                setDateGamme(lastMaintenance.date_gamme || "");
+                                setHeuresService(
+                                  lastMaintenance.heures_service.toString()
+                                );
+                                setGammeExecutee(
+                                  lastMaintenance.gamme_executee || ""
+                                );
+                                setSelectedFiltres(
+                                  lastMaintenance.filtres_remplaces || []
+                                );
+                                setDialogOpen(true);
+                              }
+                            }}
+                          >
+                            Modifier
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={async () => {
+                              // Récupérer le dernier enregistrement de maintenance pour cet engin
+                              const lastMaintenance = maintenanceRecords
+                                .filter(
+                                  (record) => record.engin_id === engin.id
+                                )
+                                .sort(
+                                  (a, b) =>
+                                    new Date(b.date_execution).getTime() -
+                                    new Date(a.date_execution).getTime()
+                                )[0];
+
+                              if (
+                                lastMaintenance &&
+                                confirm(
+                                  "Êtes-vous sûr de vouloir supprimer cet enregistrement de maintenance?"
+                                )
+                              ) {
+                                try {
+                                  const { error } = await supabase
+                                    .from("maintenance_preventive")
+                                    .delete()
+                                    .eq("id", lastMaintenance.id);
+
+                                  if (error) throw error;
+
+                                  toast({
+                                    title: "Succès",
+                                    description:
+                                      "Enregistrement de maintenance supprimé avec succès",
+                                  });
+
+                                  fetchData();
+                                } catch (error) {
+                                  console.error(
+                                    "Error deleting maintenance:",
+                                    error
+                                  );
+                                  toast({
+                                    title: "Erreur",
+                                    description:
+                                      "Impossible de supprimer l'enregistrement de maintenance",
+                                    variant: "destructive",
+                                  });
+                                }
+                              }
+                            }}
+                          >
+                            Supprimer
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   );
                 })}

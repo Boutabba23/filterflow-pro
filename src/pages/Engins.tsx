@@ -280,7 +280,8 @@ export default function Engins() {
     }
   };
 
-  const getEnginIcon = (designation: string) => {
+  const getEnginIcon = (designation: string | undefined) => {
+    if (!designation) return "🔧";
     if (designation.includes("BULL")) return "🚜";
     if (designation.includes("PELLE")) return "🚧";
     if (designation.includes("CHARGEUSE")) return "🏗️";
@@ -292,7 +293,7 @@ export default function Engins() {
       <div className="min-h-screen bg-gradient-subtle">
         <div className="space-y-8">
           {/* Animated Header Section */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-header p-8 shadow-glow animate-fade-in">
+          <div className="relative overflow-hidden rounded-xl bg-gradient-header p-8 shadow-vibrant drop-shadow-xl animate-fade-in">
             <div className="absolute inset-0 bg-black/5 backdrop-blur-sm"></div>
             <div className="relative z-10 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4 animate-bounce-in">
@@ -440,11 +441,15 @@ export default function Engins() {
                     placeholder="Rechercher par code, type, marque..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 h-12 text-lg border-primary/20 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:shadow-glow"
+                    className="pl-12 h-12 max-sm:text-sm text-lg border-primary/20 focus:border-primary 
+                     focus:ring-primary/20 transition-all duration-300 hover:shadow-glow"
                   />
                 </div>
                 <Select>
-                  <SelectTrigger className="w-full lg:w-56 h-12 border-accent/20 focus:border-accent hover:shadow-vibrant transition-all duration-300">
+                  <SelectTrigger
+                    className="w-full lg:w-56 h-12 border-accent/20
+                   focus:border-accent hover:shadow-vibrant transition-all duration-300"
+                  >
                     <SelectValue placeholder="Filtrer par statut" />
                   </SelectTrigger>
                   <SelectContent className="bg-gradient-card">
@@ -541,9 +546,11 @@ export default function Engins() {
                         <span className="text-sm text-foreground">
                           Dernière maintenance:{" "}
                           <span className="font-bold text-primary">
-                            {new Date(
-                              engin.derniereMaintenancePréventive
-                            ).toLocaleDateString("fr-FR")}
+                            {engin.derniere_maintenance_preventive
+                              ? new Date(
+                                  engin.derniere_maintenance_preventive
+                                ).toLocaleDateString("fr-FR")
+                              : "Non définie"}
                           </span>
                         </span>
                       </div>

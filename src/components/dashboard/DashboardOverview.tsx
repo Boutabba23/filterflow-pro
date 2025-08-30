@@ -233,7 +233,22 @@ export function DashboardOverview() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 animate-fade-in">
-        {stats.map((stat, index) => (
+        {[
+          { title: "Total Engins", value: stats.totalEngins, icon: Wrench },
+          { title: "Total Filtres", value: stats.totalFiltres, icon: Filter },
+          {
+            title: "Filtres en Stock Faible",
+            value: stats.lowStockFiltres,
+            icon: AlertTriangle,
+            variant: "warning" as const,
+          },
+          {
+            title: "Engins en Maintenance",
+            value: stats.enginsEnMaintenance,
+            icon: Wrench,
+            variant: "accent" as const,
+          },
+        ].map((stat, index) => (
           <div key={stat.title} style={{ animationDelay: `${index * 100}ms` }}>
             <StatsCard {...stat} />
           </div>
