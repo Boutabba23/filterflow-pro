@@ -48,9 +48,9 @@ import {
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useEngins, useCreateEngin, useUpdateEngin, useDeleteEngin } from "@/hooks/useApi";
+import { useEngins, useCreateEngin, useUpdateEngin, useDeleteEngin } from "@/hooks/useSupabase";
 import { useToast } from "@/hooks/use-toast";
-import type { Engin } from "@shared/schema";
+import type { Engin } from "@/lib/supabase";
 
 export default function Engins() {
   const isMobile = useIsMobile();

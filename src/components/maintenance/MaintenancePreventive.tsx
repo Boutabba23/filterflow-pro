@@ -30,8 +30,8 @@ import {
 import { Plus, Search, Wrench, Clock, AlertTriangle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { useEngins, useFiltres, useMaintenanceRecords, useCreateMaintenanceRecord } from "@/hooks/useApi";
-import type { Engin, Filtre, MaintenancePreventive } from "@shared/schema";
+import { useEngins, useFiltres, useMaintenancePreventive, useCreateMaintenancePreventive } from "@/hooks/useSupabase";
+import type { Engin, Filtre, MaintenancePreventive } from "@/lib/supabase";
 
 // Define the gamme schedule data
 const GAMMES_ENTRETIEN = [
@@ -60,8 +60,8 @@ export function MaintenancePreventive() {
   // Use API hooks
   const { data: engins = [], isLoading: enginsLoading } = useEngins();
   const { data: filtres = [] } = useFiltres();
-  const { data: maintenanceRecords = [], refetch: refetchMaintenance } = useMaintenanceRecords();
-  const createMaintenanceMutation = useCreateMaintenanceRecord();
+  const { data: maintenanceRecords = [], refetch: refetchMaintenance } = useMaintenancePreventive();
+  const createMaintenanceMutation = useCreateMaintenancePreventive();
 
   const getNextGamme = (enginId: number) => {
     const enginMaintenances = maintenanceRecords.filter(

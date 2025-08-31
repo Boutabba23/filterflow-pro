@@ -19,7 +19,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEngins, useFiltres } from "@/hooks/useApi";
+import { useEngins, useFiltres } from "@/hooks/useSupabase";
 
 export function DashboardOverview() {
   const { data: engins = [] } = useEngins();

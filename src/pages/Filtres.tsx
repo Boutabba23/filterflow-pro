@@ -51,9 +51,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MaintenancePreventive } from "@/components/maintenance/MaintenancePreventive";
-import { useFiltres, useCreateFiltre, useDeleteFiltre } from "@/hooks/useApi";
+import { useFiltres, useCreateFiltre, useDeleteFiltre } from "@/hooks/useSupabase";
 import { useToast } from "@/hooks/use-toast";
-import type { Filtre } from "@shared/schema";
+import type { Filtre } from "@/lib/supabase";
 
 export default function Filtres() {
   const isMobile = useIsMobile();
