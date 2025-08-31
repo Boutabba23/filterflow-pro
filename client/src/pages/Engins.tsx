@@ -46,11 +46,23 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+// Define types for the engin objects
+type Engin = {
+  id: number;
+  code: string;
+  désignation: string;
+  marque: string;
+  type: string;
+  heures: number;
+  statut: string;
+  derniereMaintenancePréventive: string;
+};
+
 export default function Engins() {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
   const [editOpen, setEditOpen] = useState(false);
-  const [currentEngin, setCurrentEngin] = useState(null);
+  const [currentEngin, setCurrentEngin] = useState<Engin | null>(null);
   const [editFormData, setEditFormData] = useState({
     code: "",
     désignation: "",
@@ -113,7 +125,7 @@ export default function Engins() {
       engin.marque.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleEditClick = (engin) => {
+  const handleEditClick = (engin: Engin) => {
     setCurrentEngin(engin);
     setEditFormData({
       code: engin.code,
@@ -125,7 +137,7 @@ export default function Engins() {
     setEditOpen(true);
   };
 
-  const handleEditInputChange = (e) => {
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     const fieldName = id.replace("edit-", "");
     setEditFormData((prev) => ({
@@ -134,7 +146,7 @@ export default function Engins() {
     }));
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -202,7 +214,7 @@ export default function Engins() {
     setEngins([...engins, newEngin]);
     setFormData({
       code: "",
-      désignation: "",	
+      désignation: "",  
       marque: "",
       type: "",
       heures: 0,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,39 +29,21 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Wrench, Clock, AlertTriangle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useEngins, useFiltres, useMaintenanceRecords, useCreateMaintenanceRecord } from "@/hooks/useApi";
+import type { Engin, Filtre, MaintenancePreventive } from "@shared/schema";
 
-interface Engin {
-  id: number;
-  code: string;
-  marque: string;
-  type: string;
-  heures: number;
-}
-
-interface Filtre {
-  id: number;
-  reference_principale: string;
-  type: string;
-  fabricant: string;
-}
-
-interface GammeEntretien {
-  id: number;
-  gamme: string;
-  sequence_order: number;
-  heures_interval: number;
-}
-
-interface MaintenanceRecord {
-  id: number;
-  engin: Engin;
-  gamme: GammeEntretien;
-  heures_service: number;
-  date_execution: string;
-  filtres_remplaces: number[];
-}
+// Define the gamme schedule data
+const GAMMES_ENTRETIEN = [
+  { id: 1, gamme: 'C', sequence_order: 1, heures_interval: 500 },
+  { id: 2, gamme: 'D', sequence_order: 2, heures_interval: 1000 },
+  { id: 3, gamme: 'C', sequence_order: 3, heures_interval: 1500 },
+  { id: 4, gamme: 'E', sequence_order: 4, heures_interval: 2000 },
+  { id: 5, gamme: 'C', sequence_order: 5, heures_interval: 2500 },
+  { id: 6, gamme: 'D', sequence_order: 6, heures_interval: 3000 },
+  { id: 7, gamme: 'C', sequence_order: 7, heures_interval: 3500 },
+  { id: 8, gamme: 'F', sequence_order: 8, heures_interval: 4000 },
+];
 
 export function MaintenancePreventive() {
   const isMobile = useIsMobile();
@@ -75,75 +57,33 @@ export function MaintenancePreventive() {
   const [selectedFiltres, setSelectedFiltres] = useState<number[]>([]);
   const [heuresService, setHeuresService] = useState("");
   
-  // Data states
-  const [engins, setEngins] = useState<Engin[]>([]);
-  const [filtres, setFiltres] = useState<Filtre[]>([]);
-  const [gammes, setGammes] = useState<GammeEntretien[]>([]);
-  const [maintenanceRecords, setMaintenanceRecords] = useState<MaintenanceRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Use API hooks
+  const { data: engins = [], isLoading: enginsLoading } = useEngins();
+  const { data: filtres = [] } = useFiltres();
+  const { data: maintenanceRecords = [], refetch: refetchMaintenance } = useMaintenanceRecords();
+  const createMaintenanceMutation = useCreateMaintenanceRecord();
 
-  // Fetch data on component mount
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch all necessary data
-      const [enginsRes, filtresRes, gammesRes, maintenanceRes] = await Promise.all([
-        supabase.from('engins').select('*').order('code'),
-        supabase.from('filtres').select('*').order('reference_principale'),
-        supabase.from('gammes_entretien').select('*').order('sequence_order'),
-        supabase
-          .from('maintenance_preventive')
-          .select(`
-            *,
-            engin:engins(*),
-            gamme:gammes_entretien(*)
-          `)
-          .order('date_execution', { ascending: false })
-      ]);
-
-      if (enginsRes.error) throw enginsRes.error;
-      if (filtresRes.error) throw filtresRes.error;
-      if (gammesRes.error) throw gammesRes.error;
-      if (maintenanceRes.error) throw maintenanceRes.error;
-
-      setEngins(enginsRes.data || []);
-      setFiltres(filtresRes.data || []);
-      setGammes(gammesRes.data || []);
-      setMaintenanceRecords(maintenanceRes.data || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les données",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getNextGamme = (enginId: number): GammeEntretien | null => {
+  const getNextGamme = (enginId: number) => {
     const enginMaintenances = maintenanceRecords.filter(
-      (record) => record.engin.id === enginId
+      (record) => record.engin_id === enginId
     );
     
     if (enginMaintenances.length === 0) {
       // Premier entretien, commencer par C (sequence_order = 1)
-      return gammes.find(g => g.sequence_order === 1) || null;
+      return GAMMES_ENTRETIEN.find(g => g.sequence_order === 1) || null;
     }
 
     // Trouver la dernière maintenance
-    const lastMaintenance = enginMaintenances[0]; // Déjà trié par date desc
-    const lastSequence = lastMaintenance.gamme.sequence_order;
+    const lastMaintenance = enginMaintenances
+      .sort((a, b) => new Date(b.date_execution || '').getTime() - new Date(a.date_execution || '').getTime())[0];
+    
+    // Find the corresponding gamme entry
+    const lastGamme = GAMMES_ENTRETIEN.find(g => g.id === lastMaintenance.gamme_id);
+    if (!lastGamme) return GAMMES_ENTRETIEN[0];
     
     // Trouver la prochaine gamme dans le cycle
-    const nextSequence = lastSequence >= 8 ? 1 : lastSequence + 1;
-    return gammes.find(g => g.sequence_order === nextSequence) || null;
+    const nextSequence = lastGamme.sequence_order >= 8 ? 1 : lastGamme.sequence_order + 1;
+    return GAMMES_ENTRETIEN.find(g => g.sequence_order === nextSequence) || null;
   };
 
   const calculateRemainingHours = (engin: Engin): number => {
@@ -151,18 +91,23 @@ export function MaintenancePreventive() {
     if (!nextGamme) return 0;
 
     const enginMaintenances = maintenanceRecords.filter(
-      (record) => record.engin.id === engin.id
+      (record) => record.engin_id === engin.id
     );
 
     if (enginMaintenances.length === 0) {
       // Premier entretien à nextGamme.heures_interval
-      return Math.max(0, nextGamme.heures_interval - engin.heures);
+      return Math.max(0, nextGamme.heures_interval - (engin.heures || 0));
     }
 
     // Calculer les heures depuis la dernière maintenance
-    const lastMaintenance = enginMaintenances[0];
-    const heuresDepuisDerniere = engin.heures - lastMaintenance.heures_service;
-    const intervalleProchaine = nextGamme.heures_interval - lastMaintenance.gamme.heures_interval;
+    const lastMaintenance = enginMaintenances
+      .sort((a, b) => new Date(b.date_execution || '').getTime() - new Date(a.date_execution || '').getTime())[0];
+    const lastGamme = GAMMES_ENTRETIEN.find(g => g.id === lastMaintenance.gamme_id);
+    
+    if (!lastGamme) return 0;
+    
+    const heuresDepuisDerniere = (engin.heures || 0) - lastMaintenance.heures_service;
+    const intervalleProchaine = nextGamme.heures_interval - lastGamme.heures_interval;
     
     return Math.max(0, intervalleProchaine - heuresDepuisDerniere);
   };
@@ -178,16 +123,12 @@ export function MaintenancePreventive() {
     }
 
     try {
-      const { error } = await supabase
-        .from('maintenance_preventive')
-        .insert({
-          engin_id: parseInt(selectedEngin),
-          gamme_id: parseInt(selectedGamme),
-          heures_service: parseInt(heuresService),
-          filtres_remplaces: selectedFiltres,
-        });
-
-      if (error) throw error;
+      await createMaintenanceMutation.mutateAsync({
+        engin_id: parseInt(selectedEngin),
+        gamme_id: parseInt(selectedGamme),
+        heures_service: parseInt(heuresService),
+        filtres_remplaces: selectedFiltres,
+      });
 
       toast({
         title: "Succès",
@@ -200,7 +141,7 @@ export function MaintenancePreventive() {
       setSelectedFiltres([]);
       setHeuresService("");
       setDialogOpen(false);
-      fetchData();
+      refetchMaintenance();
     } catch (error) {
       console.error('Error adding maintenance:', error);
       toast({
@@ -227,7 +168,7 @@ export function MaintenancePreventive() {
     engin.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
+  if (enginsLoading) {
     return (
       <CardContent className="p-6">
         <div className="flex items-center justify-center h-64">
@@ -285,7 +226,7 @@ export function MaintenancePreventive() {
                       <SelectValue placeholder="Sélectionner une gamme" />
                     </SelectTrigger>
                     <SelectContent>
-                      {gammes.map((gamme) => (
+                      {GAMMES_ENTRETIEN.map((gamme) => (
                         <SelectItem key={gamme.id} value={gamme.id.toString()}>
                           Gamme {gamme.gamme} ({gamme.heures_interval}h)
                         </SelectItem>
@@ -323,8 +264,11 @@ export function MaintenancePreventive() {
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Annuler
               </Button>
-              <Button onClick={handleAddMaintenance}>
-                Enregistrer
+              <Button 
+                onClick={handleAddMaintenance}
+                disabled={createMaintenanceMutation.isPending}
+              >
+                {createMaintenanceMutation.isPending ? "Enregistrement..." : "Enregistrer"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -375,7 +319,7 @@ export function MaintenancePreventive() {
                       <TableCell>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          {engin.heures}h
+                          {engin.heures || 0}h
                         </div>
                       </TableCell>
                       <TableCell>
