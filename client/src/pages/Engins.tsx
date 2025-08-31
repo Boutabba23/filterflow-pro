@@ -33,39 +33,34 @@ import {
 import {
   Plus,
   Search,
-  Edit,
+  Edit3,
   Trash2,
   Wrench,
   Calendar,
   MapPin,
-  HourglassIcon,
-  Building2,
-  Cog,
+  Clock,
+  Filter,
+  MoreVertical,
+  Eye,
+  Settings,
+  TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-// Define types for the engin objects
-type Engin = {
-  id: number;
-  code: string;
-  désignation: string;
-  marque: string;
-  type: string;
-  heures: number;
-  statut: string;
-  derniereMaintenancePréventive: string;
-};
+import { useEngins, useCreateEngin, useUpdateEngin, useDeleteEngin } from "@/hooks/useApi";
+import { useToast } from "@/hooks/use-toast";
+import type { Engin } from "@shared/schema";
 
 export default function Engins() {
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [currentEngin, setCurrentEngin] = useState<Engin | null>(null);
   const [editFormData, setEditFormData] = useState({
     code: "",
-    désignation: "",
+    designation: "",
     marque: "",
     type: "",
     heures: 0,
@@ -73,7 +68,7 @@ export default function Engins() {
 
   const [formData, setFormData] = useState({
     code: "",
-    désignation: "",
+    designation: "",
     marque: "",
     type: "",
     heures: 0,
@@ -84,39 +79,10 @@ export default function Engins() {
   const [enginToDelete, setEnginToDelete] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Mock data - sera remplacé par les données Supabase
-  const [engins, setEngins] = useState([
-    {
-      id: 1,
-      code: "A03010236",
-      désignation: "BULL SUR CHENILLE",
-      marque: "Caterpillar",
-      type: "D8R",
-      heures: 2450,
-      statut: "Actif",
-      derniereMaintenancePréventive: "2024-01-15",
-    },
-    {
-      id: 2,
-      code: "A01020672",
-      désignation: "PELLE SUR CHENILLE",
-      marque: "LIBHERR",
-      type: "R944CL",
-      heures: 5450,
-      statut: "Actif",
-      derniereMaintenancePréventive: "2024-04-15",
-    },
-    {
-      id: 3,
-      code: "A05030891",
-      désignation: "CHARGEUSE SUR PNEUS",
-      marque: "Caterpillar",
-      type: "950M",
-      heures: 3200,
-      statut: "Maintenance",
-      derniereMaintenancePréventive: "2024-02-20",
-    },
-  ]);
+  const { data: engins = [], isLoading } = useEngins();
+  const createEnginMutation = useCreateEngin();
+  const updateEnginMutation = useUpdateEngin();
+  const deleteEnginMutation = useDeleteEngin();
 
   const filteredEngins = engins.filter(
     (engin) =>
@@ -129,10 +95,10 @@ export default function Engins() {
     setCurrentEngin(engin);
     setEditFormData({
       code: engin.code,
-      désignation: engin.désignation,
+      designation: engin.designation,
       marque: engin.marque,
       type: engin.type,
-      heures: engin.heures,
+      heures: engin.heures || 0,
     });
     setEditOpen(true);
   };
@@ -155,72 +121,26 @@ export default function Engins() {
     setErrors({ ...errors, [id]: "" });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (currentEngin) {
-      const updatedEngins = engins.map((engin) =>
-        engin.id === currentEngin.id
-          ? {
-              ...engin,
-              code: editFormData.code,
-              désignation: editFormData.désignation,
-              marque: editFormData.marque,
-              type: editFormData.type,
-              heures: Number(editFormData.heures),
-            }
-          : engin
-      );
-      setEngins(updatedEngins);
-      setEditOpen(false);
+      try {
+        await updateEnginMutation.mutateAsync({
+          id: currentEngin.id,
+          engin: editFormData,
+        });
+        toast({
+          title: "Succès",
+          description: "Engin modifié avec succès",
+        });
+        setEditOpen(false);
+      } catch (error) {
+        toast({
+          title: "Erreur",
+          description: "Erreur lors de la modification",
+          variant: "destructive",
+        });
+      }
     }
-  };
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.code.trim()) {
-      newErrors.code = "Le code est requis";
-    }
-    if (!formData.désignation.trim()) {
-      newErrors.désignation = "La désignation est requise";
-    }
-    if (!formData.marque.trim()) {
-      newErrors.marque = "La marque est requise";
-    }
-    if (!formData.type.trim()) {
-      newErrors.type = "Le type est requis";
-    }
-    if (isNaN(Number(formData.heures)) || Number(formData.heures) < 0) {
-      newErrors.heures = "Les heures doivent être un nombre positif";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleAddEngin = () => {
-    if (!validateForm()) return;
-
-    const newEngin = {
-      id: engins.length > 0 ? Math.max(...engins.map((e) => e.id)) + 1 : 1,
-      code: formData.code,
-      désignation: formData.désignation,
-      marque: formData.marque,
-      type: formData.type,
-      heures: Number(formData.heures),
-      statut: "Actif",
-      derniereMaintenancePréventive: new Date().toISOString().split("T")[0],
-    };
-
-    setEngins([...engins, newEngin]);
-    setFormData({
-      code: "",
-      désignation: "",  
-      marque: "",
-      type: "",
-      heures: 0,
-    });
-    setErrors({});
-    setAddDialogOpen(false);
   };
 
   const handleDeleteEngin = (id: number) => {
@@ -228,404 +148,395 @@ export default function Engins() {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDeleteEngin = () => {
-    if (enginToDelete !== null) {
-      setEngins(engins.filter((engin) => engin.id !== enginToDelete));
-      setEnginToDelete(null);
-      setDeleteDialogOpen(false);
+  const confirmDelete = async () => {
+    if (enginToDelete) {
+      try {
+        await deleteEnginMutation.mutateAsync(enginToDelete);
+        toast({
+          title: "Succès",
+          description: "Engin supprimé avec succès",
+        });
+        setDeleteDialogOpen(false);
+        setEnginToDelete(null);
+      } catch (error) {
+        toast({
+          title: "Erreur",
+          description: "Erreur lors de la suppression",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const cancelDeleteEngin = () => {
-    setEnginToDelete(null);
-    setDeleteDialogOpen(false);
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.code) newErrors.code = "Le code est requis";
+    if (!formData.designation) newErrors.designation = "La désignation est requise";
+    if (!formData.marque) newErrors.marque = "La marque est requise";
+    if (!formData.type) newErrors.type = "Le type est requis";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const getStatusColor = (statut: string) => {
-    switch (statut) {
-      case "Actif":
-        return "bg-success/10 text-success border-success/20";
-      case "Maintenance":
-        return "bg-warning/10 text-warning border-warning/20";
-      case "Réparation":
-        return "bg-destructive/10 text-destructive border-destructive/20";
-      default:
-        return "bg-muted/10 text-muted-foreground border-muted/20";
+  const handleAddEngin = async () => {
+    if (!validateForm()) return;
+
+    try {
+      await createEnginMutation.mutateAsync(formData);
+      toast({
+        title: "Succès",
+        description: "Engin ajouté avec succès",
+      });
+      setFormData({
+        code: "",
+        designation: "",
+        marque: "",
+        type: "",
+        heures: 0,
+      });
+      setAddDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'ajout",
+        variant: "destructive",
+      });
     }
   };
 
-  const getEnginIcon = (designation: string) => {
-    if (designation.includes("BULL")) return "🚜";
-    if (designation.includes("PELLE")) return "🚧";
-    if (designation.includes("CHARGEUSE")) return "🏗️";
-    return "🔧";
+  const getStatusBadge = (engin: Engin) => {
+    const hours = engin.heures || 0;
+    if (hours > 5000) {
+      return <Badge className="bg-red-100 text-red-700 border-red-200">Haute utilisation</Badge>;
+    } else if (hours > 2000) {
+      return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200">Utilisation normale</Badge>;
+    }
+    return <Badge className="bg-green-100 text-green-700 border-green-200">Bon état</Badge>;
   };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-subtle">
-        <div className="space-y-8">
-          {/* Animated Header Section */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-header p-8 shadow-glow animate-fade-in">
-            <div className="absolute inset-0 bg-black/5 backdrop-blur-sm"></div>
-            <div className="relative z-10 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4 animate-bounce-in">
-                <Wrench className="h-8 w-8 text-white" />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-600 rounded-2xl p-6 text-white shadow-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                <Wrench className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-4xl font-bold text-white mb-2 animate-slide-in">
-                Gestion des Engins
-              </h1>
-              <p className="text-white/90 text-lg mb-6 animate-slide-in">
-                Gérez votre parc d'engins de chantier
-              </p>
+              <div>
+                <h1 className="text-2xl font-bold">Gestion des Engins</h1>
+                <p className="text-white/90">Parc d'équipements et machines</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-white/90">
+              <TrendingUp className="h-5 w-5" />
+              <span className="font-medium">{engins.length} engins actifs</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Actions */}
+        <Card className="border-0 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row gap-4 items-center">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  placeholder="Rechercher par code, marque, type..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 h-12 border-gray-200 focus:border-blue-500 rounded-xl"
+                />
+              </div>
               <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button 
-                    size="lg"
-                    className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-vibrant animate-scale-in"
-                  >
+                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg">
                     <Plus className="h-5 w-5 mr-2" />
                     Nouvel Engin
                   </Button>
                 </DialogTrigger>
-                <DialogContent className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}>
+                <DialogContent className="max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>Ajouter un Nouvel Engin</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Plus className="h-5 w-5" />
+                      Ajouter un Nouvel Engin
+                    </DialogTitle>
                   </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
+                  <div className="grid gap-6 py-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="code">Code</Label>
+                        <Label htmlFor="code">Code Engin *</Label>
                         <Input
                           id="code"
-                          placeholder="ex: A03010236"
+                          placeholder="Ex: A03010236"
                           value={formData.code}
                           onChange={handleInputChange}
-                          className={errors.code ? "border-destructive" : ""}
+                          className={errors.code ? "border-red-500" : ""}
                         />
-                        {errors.code && (
-                          <p className="text-sm text-destructive">{errors.code}</p>
-                        )}
+                        {errors.code && <p className="text-red-500 text-sm">{errors.code}</p>}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="désignation">Désignation</Label>
-                        <Input
-                          id="désignation"
-                          placeholder="ex: BULL SUR CHENILLE"
-                          value={formData.désignation}
-                          onChange={handleInputChange}
-                          className={errors.désignation ? "border-destructive" : ""}
-                        />
-                        {errors.désignation && (
-                          <p className="text-sm text-destructive">
-                            {errors.désignation}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
-                      <div className="space-y-2">
-                        <Label htmlFor="marque">Marque</Label>
+                        <Label htmlFor="marque">Marque *</Label>
                         <Input
                           id="marque"
-                          placeholder="ex: Caterpillar"
+                          placeholder="Ex: Caterpillar"
                           value={formData.marque}
                           onChange={handleInputChange}
-                          className={errors.marque ? "border-destructive" : ""}
+                          className={errors.marque ? "border-red-500" : ""}
                         />
-                        {errors.marque && (
-                          <p className="text-sm text-destructive">
-                            {errors.marque}
-                          </p>
-                        )}
+                        {errors.marque && <p className="text-red-500 text-sm">{errors.marque}</p>}
                       </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="type">Type</Label>
+                        <Label htmlFor="type">Type *</Label>
                         <Input
                           id="type"
-                          placeholder="ex: D8R"
+                          placeholder="Ex: D8R"
                           value={formData.type}
                           onChange={handleInputChange}
-                          className={errors.type ? "border-destructive" : ""}
+                          className={errors.type ? "border-red-500" : ""}
                         />
-                        {errors.type && (
-                          <p className="text-sm text-destructive">{errors.type}</p>
-                        )}
+                        {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="heures">Heures de Service</Label>
+                        <Input
+                          id="heures"
+                          type="number"
+                          placeholder="0"
+                          value={formData.heures}
+                          onChange={handleInputChange}
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="heures">Heures</Label>
+                      <Label htmlFor="designation">Désignation *</Label>
                       <Input
-                        id="heures"
-                        type="number"
-                        placeholder="0"
-                        value={formData.heures}
+                        id="designation"
+                        placeholder="Ex: BULL SUR CHENILLE"
+                        value={formData.designation}
                         onChange={handleInputChange}
-                        className={errors.heures ? "border-destructive" : ""}
+                        className={errors.designation ? "border-red-500" : ""}
                       />
-                      {errors.heures && (
-                        <p className="text-sm text-destructive">
-                          {errors.heures}
-                        </p>
-                      )}
+                      {errors.designation && <p className="text-red-500 text-sm">{errors.designation}</p>}
                     </div>
                   </div>
-                  <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                  <DialogFooter>
                     <DialogClose asChild>
-                      <Button variant="outline" className="w-full sm:w-auto">
-                        Annuler
-                      </Button>
+                      <Button variant="outline">Annuler</Button>
                     </DialogClose>
-                    <Button
-                      className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
+                    <Button 
                       onClick={handleAddEngin}
+                      disabled={createEnginMutation.isPending}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600"
                     >
-                      Ajouter
+                      {createEnginMutation.isPending ? "Ajout..." : "Ajouter l'Engin"}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Animated Search Section */}
-          <Card className="shadow-vibrant bg-gradient-card border-0 overflow-hidden animate-fade-in">
-            <CardContent className="p-6">
-              <div className="flex flex-col lg:flex-row gap-4 items-center">
-                <div className="relative flex-1 w-full">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary animate-pulse" />
-                  <Input
-                    placeholder="Rechercher par code, type, marque..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 h-12 text-lg border-primary/20 focus:border-primary focus:ring-primary/20 transition-all duration-300 hover:shadow-glow"
-                  />
-                </div>
-                <Select>
-                  <SelectTrigger className="w-full lg:w-56 h-12 border-accent/20 focus:border-accent hover:shadow-vibrant transition-all duration-300">
-                    <SelectValue placeholder="Filtrer par statut" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gradient-card">
-                    <SelectItem value="all">Tous les statuts</SelectItem>
-                    <SelectItem value="actif">✅ Actif</SelectItem>
-                    <SelectItem value="maintenance">🔧 Maintenance</SelectItem>
-                    <SelectItem value="reparation">⚠️ Réparation</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Animated Engins Grid */}
-          <Card className="shadow-glow bg-gradient-card border-0 overflow-hidden animate-fade-in">
-            <CardHeader className="bg-gradient-rainbow text-white">
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
-                  <Cog className="h-6 w-6" />
-                </div>
-                Parc d'Engins ({filteredEngins.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              {/* Modern Grid Layout */}
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredEngins.map((engin, index) => (
-                  <div 
-                    key={engin.id}
-                    className="group relative bg-white dark:bg-card rounded-2xl p-6 shadow-card hover:shadow-vibrant transition-all duration-500 hover:scale-105 animate-scale-in border border-primary/5 hover:border-primary/20"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    {/* Gradient Background Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    
-                    {/* Content */}
-                    <div className="relative z-10">
-                      {/* Header */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-2xl">
-                            {getEnginIcon(engin.désignation)}
-                          </div>
-                          <div>
-                            <Link
-                              to={`/engins/${engin.id}`}
-                              className="text-lg font-bold text-primary hover:text-primary-hover transition-colors duration-200 hover:underline"
-                            >
-                              {engin.code}
-                            </Link>
-                            <Badge 
-                              className={`ml-2 ${getStatusColor(engin.statut)} text-xs animate-pulse`}
-                            >
-                              {engin.statut}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Description & Type */}
-                      <div className="mb-4">
-                        <h3 className="font-semibold text-foreground mb-1">{engin.désignation}</h3>
-                        <Badge variant="outline" className="text-xs bg-accent/10 border-accent/20 text-accent">
-                          {engin.type}
-                        </Badge>
-                      </div>
-
-                      {/* Manufacturer & Hours */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-foreground">{engin.marque}</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-success/10 px-3 py-1 rounded-full">
-                          <HourglassIcon className="h-4 w-4 text-success" />
-                          <span className="font-bold text-success">{engin.heures.toLocaleString()}h</span>
-                        </div>
-                      </div>
-
-                      {/* Last Maintenance */}
-                      <div className="flex items-center gap-2 mb-4 p-2 bg-muted/30 rounded-lg">
-                        <Calendar className="h-4 w-4 text-primary" />
-                        <span className="text-sm text-foreground">
-                          Dernière maintenance: <span className="font-bold text-primary">
-                            {new Date(engin.derniereMaintenancePréventive).toLocaleDateString("fr-FR")}
-                          </span>
-                        </span>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 bg-accent/10 text-accent border-accent/20 hover:bg-accent hover:text-accent-foreground transition-all duration-300 hover:scale-105"
-                          onClick={() => handleEditClick(engin)}
-                        >
-                          <Edit className="h-4 w-4 mr-2" />
-                          Modifier
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteEngin(engin.id)}
-                          className="bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive hover:text-destructive-foreground transition-all duration-300 hover:scale-105"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+        {/* Engins Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredEngins.map((engin) => (
+            <Card key={engin.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                      <Wrench className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg text-gray-900">{engin.code}</CardTitle>
+                      <p className="text-gray-600 text-sm">{engin.marque} {engin.type}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-
-              {/* Empty State */}
-              {filteredEngins.length === 0 && (
-                <div className="text-center py-16 animate-fade-in">
-                  <div className="w-24 h-24 mx-auto mb-4 bg-gradient-vibrant rounded-full flex items-center justify-center">
-                    <Wrench className="h-12 w-12 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-foreground mb-2">Aucun engin trouvé</h3>
-                  <p className="text-muted-foreground">Essayez de modifier vos critères de recherche</p>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
                 </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="font-medium text-gray-900">{engin.designation}</p>
+                </div>
+                
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {engin.heures || 0}h
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    {engin.derniere_maintenance_preventive ? 
+                      new Date(engin.derniere_maintenance_preventive).toLocaleDateString('fr-FR') : 
+                      'Aucune'
+                    }
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  {getStatusBadge(engin)}
+                  <div className="flex gap-2">
+                    <Link to={`/engins/${engin.id}`}>
+                      <Button variant="outline" size="sm" className="h-8 px-3">
+                        <Eye className="h-4 w-4 mr-1" />
+                        Voir
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 px-3"
+                      onClick={() => handleEditClick(engin)}
+                    >
+                      <Edit3 className="h-4 w-4 mr-1" />
+                      Éditer
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 px-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDeleteEngin(engin.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {filteredEngins.length === 0 && (
+          <Card className="border-0 shadow-lg">
+            <CardContent className="p-12 text-center">
+              <Wrench className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun engin trouvé</h3>
+              <p className="text-gray-600 mb-4">
+                {searchTerm ? "Aucun engin ne correspond à votre recherche." : "Commencez par ajouter votre premier engin."}
+              </p>
+              {!searchTerm && (
+                <Button 
+                  onClick={() => setAddDialogOpen(true)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Ajouter un Engin
+                </Button>
               )}
             </CardContent>
           </Card>
-        </div>
-      </div>
+        )}
 
-      {/* Edit Dialog */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className={`${isMobile ? "w-[95%] max-w-none" : "max-w-2xl"}`}>
-          <DialogHeader>
-            <DialogTitle>
-              Modifier l'engin - {currentEngin?.code}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
-              <div className="space-y-2">
-                <Label htmlFor="edit-code">Code Engin</Label>
-                <Input
-                  id="edit-code"
-                  value={editFormData.code}
-                  onChange={handleEditInputChange}
-                />
+        {/* Edit Dialog */}
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="h-5 w-5" />
+                Modifier l'Engin
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-6 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-code">Code Engin</Label>
+                  <Input
+                    id="edit-code"
+                    value={editFormData.code}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-marque">Marque</Label>
+                  <Input
+                    id="edit-marque"
+                    value={editFormData.marque}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-type">Type</Label>
+                  <Input
+                    id="edit-type"
+                    value={editFormData.type}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-heures">Heures de Service</Label>
+                  <Input
+                    id="edit-heures"
+                    type="number"
+                    value={editFormData.heures}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-désignation">Désignation</Label>
+                <Label htmlFor="edit-designation">Désignation</Label>
                 <Input
-                  id="edit-désignation"
-                  value={editFormData.désignation}
+                  id="edit-designation"
+                  value={editFormData.designation}
                   onChange={handleEditInputChange}
                 />
               </div>
             </div>
-            <div className={`${isMobile ? "grid grid-cols-1" : "grid grid-cols-2"} gap-4`}>
-              <div className="space-y-2">
-                <Label htmlFor="edit-marque">Marque</Label>
-                <Input
-                  id="edit-marque"
-                  value={editFormData.marque}
-                  onChange={handleEditInputChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-type">Type</Label>
-                <Input
-                  id="edit-type"
-                  value={editFormData.type}
-                  onChange={handleEditInputChange}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-heures">Heures</Label>
-              <Input
-                id="edit-heures"
-                type="number"
-                value={editFormData.heures}
-                onChange={handleEditInputChange}
-              />
-            </div>
-          </div>
-          <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
-            <DialogClose asChild>
-              <Button variant="outline" className="w-full sm:w-auto">
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditOpen(false)}>
                 Annuler
               </Button>
-            </DialogClose>
-            <Button
-              className="bg-primary hover:bg-primary-hover w-full sm:w-auto"
-              onClick={handleSaveEdit}
-            >
-              Sauvegarder
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <Button 
+                onClick={handleSaveEdit}
+                disabled={updateEnginMutation.isPending}
+                className="bg-gradient-to-r from-blue-600 to-purple-600"
+              >
+                {updateEnginMutation.isPending ? "Modification..." : "Sauvegarder"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer cet engin ? Cette action est
-              irréversible et supprimera toutes les données associées.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelDeleteEngin}>
-              Annuler
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteEngin}
-              className="bg-destructive hover:bg-destructive-hover"
-            >
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir supprimer cet engin ? Cette action est irréversible.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={confirmDelete}
+                className="bg-red-600 hover:bg-red-700"
+                disabled={deleteEnginMutation.isPending}
+              >
+                {deleteEnginMutation.isPending ? "Suppression..." : "Supprimer"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </MainLayout>
   );
 }

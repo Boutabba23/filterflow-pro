@@ -3,329 +3,294 @@ import { StatsCard } from "./StatsCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
+  TrendingUp,
+  TrendingDown,
   Filter,
   Wrench,
   Package,
   AlertTriangle,
-  TrendingUp,
   Calendar,
   Plus,
   ArrowRight,
-  Zap,
-  Target,
   Activity,
+  Clock,
+  CheckCircle,
+  Users,
+  BarChart3,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEngins, useFiltres } from "@/hooks/useApi";
 
 export function DashboardOverview() {
-  // Mock data
+  const { data: engins = [] } = useEngins();
+  const { data: filtres = [] } = useFiltres();
+
+  // Calculate real stats from API data
   const stats = [
     {
       title: "Total Filtres",
-      value: "1,247",
+      value: filtres.length.toString(),
       icon: Filter,
       trend: { value: "+12%", isPositive: true },
-      variant: "default" as const,
+      color: "from-blue-500 to-cyan-500",
+      bgColor: "from-blue-50 to-cyan-50",
     },
     {
       title: "Engins Actifs", 
-      value: "89",
+      value: engins.length.toString(),
       icon: Wrench,
       trend: { value: "+3%", isPositive: true },
-      variant: "success" as const,
+      color: "from-emerald-500 to-teal-500",
+      bgColor: "from-emerald-50 to-teal-50",
     },
     {
-      title: "Stock Critique",
-      value: "23", 
-      icon: AlertTriangle,
-      trend: { value: "-8%", isPositive: false },
-      variant: "warning" as const,
-    },
-    {
-      title: "Maintenances",
-      value: "156",
+      title: "Stock Total",
+      value: filtres.reduce((sum, f) => sum + (f.stock || 0), 0).toString(), 
       icon: Package,
-      trend: { value: "+15%", isPositive: true },
-      variant: "default" as const,
+      trend: { value: "-2%", isPositive: false },
+      color: "from-purple-500 to-violet-500",
+      bgColor: "from-purple-50 to-violet-50",
+    },
+    {
+      title: "Alertes Actives",
+      value: filtres.filter(f => (f.stock || 0) < 5).length.toString(),
+      icon: AlertTriangle,
+      trend: { value: "+5%", isPositive: false },
+      color: "from-orange-500 to-red-500",
+      bgColor: "from-orange-50 to-red-50",
     },
   ];
 
   const recentActivities = [
     {
       id: 1,
-      type: "Filtre ajouté",
-      item: "HF6177 - Filtre hydraulique",
+      action: "Nouveau filtre ajouté",
+      item: "AF25424 - Filtre à air",
       time: "Il y a 2h",
       status: "success",
+      icon: Plus,
     },
     {
       id: 2,
-      type: "Maintenance",
+      action: "Maintenance planifiée",
       item: "A03010236 - Bull D8R",
       time: "Il y a 4h",
       status: "warning",
+      icon: Calendar,
     },
     {
       id: 3,
-      type: "Stock faible",
-      item: "FF5421 - Filtre carburant",
+      action: "Stock critique",
+      item: "HF6177 - Stock: 2 unités",
       time: "Il y a 6h",
       status: "error",
+      icon: AlertTriangle,
     },
   ];
 
-  const upcomingMaintenance = [
+  const quickActions = [
     {
-      code: "A03010236",
-      designation: "Bull D8R",
-      type: "Préventive",
-      date: "2024-12-30",
-      priority: "Haute",
+      title: "Ajouter un Filtre",
+      description: "Nouveau référence au catalogue",
+      icon: Filter,
+      link: "/filtres",
+      color: "from-blue-500 to-cyan-500",
+      bgColor: "from-blue-50 to-cyan-50",
     },
     {
-      code: "A01020672",
-      designation: "Pelle R944CL",
-      type: "Curative",
-      date: "2024-12-28",
-      priority: "Moyenne",
+      title: "Nouvel Engin",
+      description: "Enregistrer un équipement",
+      icon: Wrench,
+      link: "/engins",
+      color: "from-emerald-500 to-teal-500",
+      bgColor: "from-emerald-50 to-teal-50",
+    },
+    {
+      title: "Planifier Maintenance",
+      description: "Programmer une intervention",
+      icon: Calendar,
+      link: "/filtres",
+      color: "from-purple-500 to-violet-500",
+      bgColor: "from-purple-50 to-violet-50",
     },
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "success":
-        return "bg-success/10 text-success border-success/20";
+        return "bg-green-100 text-green-700 border-green-200";
       case "warning":
-        return "bg-warning/10 text-warning border-warning/20";
+        return "bg-yellow-100 text-yellow-700 border-yellow-200";
       case "error":
-        return "bg-destructive/10 text-destructive border-destructive/20";
+        return "bg-red-100 text-red-700 border-red-200";
       default:
-        return "bg-muted/10 text-muted-foreground border-muted/20";
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "Haute":
-        return "bg-destructive/10 text-destructive border-destructive/20";
-      case "Moyenne":
-        return "bg-warning/10 text-warning border-warning/20";
-      case "Basse":
-        return "bg-success/10 text-success border-success/20";
-      default:
-        return "bg-muted/10 text-muted-foreground border-muted/20";
+        return "bg-gray-100 text-gray-700 border-gray-200";
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      <div className="space-y-8">
-        {/* Hero Section */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-header p-8 shadow-glow animate-fade-in">
-          <div className="absolute inset-0 bg-black/5 backdrop-blur-sm"></div>
-          <div className="relative z-10">
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div>
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4 animate-bounce-in">
-                  <Activity className="h-8 w-8 text-white" />
-                </div>
-                <h1 className="text-4xl font-bold text-white mb-2 animate-slide-in">
-                  Tableau de Bord
-                </h1>
-                <p className="text-white/90 text-lg animate-slide-in">
-                  Vue d'ensemble de votre système de gestion
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3 animate-scale-in">
-                <Link to="/filtres">
-                  <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nouveau Filtre
-                  </Button>
-                </Link>
-                <Link to="/engins">
-                  <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm transition-all duration-300 hover:scale-105">
-                    <Wrench className="h-4 w-4 mr-2" />
-                    Voir Engins
-                  </Button>
-                </Link>
-              </div>
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-600 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="h-16 w-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <BarChart3 className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Tableau de Bord</h1>
+              <p className="text-white/90 text-lg">Vue d'ensemble de votre système de gestion</p>
             </div>
           </div>
+          
+          <div className="flex flex-wrap gap-4">
+            <Link to="/filtres">
+              <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Nouveau Filtre
+              </Button>
+            </Link>
+            <Link to="/engins">
+              <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm">
+                <Wrench className="h-4 w-4 mr-2" />
+                Gérer Engins
+              </Button>
+            </Link>
+          </div>
         </div>
+      </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 animate-fade-in">
-          {stats.map((stat, index) => (
-            <div key={stat.title} style={{ animationDelay: `${index * 100}ms` }}>
-              <StatsCard {...stat} />
-            </div>
-          ))}
-        </div>
-
-        {/* Quick Actions */}
-        <Card className="shadow-vibrant bg-gradient-card border-0 overflow-hidden animate-fade-in">
-          <CardHeader className="bg-gradient-maintenance text-white">
-            <CardTitle className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <Zap className="h-5 w-5" />
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <Card key={stat.title} className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow">
+            <div className={`absolute inset-0 bg-gradient-to-br ${stat.bgColor} opacity-50`}></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}>
+                  <stat.icon className="h-6 w-6 text-white" />
+                </div>
+                <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                  stat.trend.isPositive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {stat.trend.isPositive ? (
+                    <TrendingUp className="h-3 w-3" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  {stat.trend.value}
+                </div>
               </div>
-              Actions Rapides
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</h3>
+                <p className="text-gray-600 text-sm">{stat.title}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-blue-50 border-b">
+          <CardTitle className="flex items-center gap-3 text-gray-900">
+            <Activity className="h-6 w-6 text-blue-600" />
+            Actions Rapides
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {quickActions.map((action) => (
+              <Link key={action.title} to={action.link}>
+                <Card className="group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-0 bg-gradient-to-br from-white to-gray-50">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className={`h-12 w-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                        <action.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                          {action.title}
+                        </h3>
+                        <p className="text-gray-600 text-sm">{action.description}</p>
+                      </div>
+                      <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Recent Activities */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-emerald-50 to-teal-50 border-b">
+            <CardTitle className="flex items-center gap-3 text-gray-900">
+              <Activity className="h-6 w-6 text-emerald-600" />
+              Activités Récentes
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link to="/filtres">
-                <Card className="group cursor-pointer hover:shadow-vibrant transition-all duration-300 hover:scale-105 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/10 hover:border-primary/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <Filter className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">Gérer Filtres</h3>
-                        <p className="text-sm text-muted-foreground">Catalogue complet</p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-primary ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-
-              <Link to="/engins">
-                <Card className="group cursor-pointer hover:shadow-vibrant transition-all duration-300 hover:scale-105 bg-gradient-to-br from-accent/5 to-accent/10 border-accent/10 hover:border-accent/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                        <Wrench className="h-5 w-5 text-accent" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">Parc Engins</h3>
-                        <p className="text-sm text-muted-foreground">89 engins actifs</p>
-                      </div>
-                      <ArrowRight className="h-4 w-4 text-accent ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-
-              <Card className="group cursor-pointer hover:shadow-vibrant transition-all duration-300 hover:scale-105 bg-gradient-to-br from-success/5 to-success/10 border-success/10 hover:border-success/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center group-hover:bg-success/20 transition-colors">
-                      <Target className="h-5 w-5 text-success" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">Rapports</h3>
-                      <p className="text-sm text-muted-foreground">Analytics détaillés</p>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-success ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="space-y-4">
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${getStatusColor(activity.status)}`}>
+                    <activity.icon className="h-5 w-5" />
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex-1">
+                    <p className="font-medium text-gray-900">{activity.action}</p>
+                    <p className="text-sm text-gray-600">{activity.item}</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <Clock className="h-3 w-3" />
+                    {activity.time}
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Recent Activities */}
-          <Card className="shadow-glow bg-gradient-card border-0 animate-fade-in">
-            <CardHeader className="bg-gradient-industrial text-white">
-              <CardTitle className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <Activity className="h-5 w-5" />
+        {/* System Status */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b">
+            <CardTitle className="flex items-center gap-3 text-gray-900">
+              <CheckCircle className="h-6 w-6 text-purple-600" />
+              État du Système
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-green-50 border border-green-200">
+                <div className="flex items-center gap-3">
+                  <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="font-medium text-green-800">Base de données</span>
                 </div>
-                Activités Récentes
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                {recentActivities.map((activity, index) => (
-                  <div
-                    key={activity.id}
-                    className="flex items-center gap-4 p-3 rounded-lg bg-gradient-to-r from-background to-muted/20 hover:shadow-card transition-all duration-300 animate-slide-in"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <Badge className={getStatusColor(activity.status)}>
-                      {activity.type}
-                    </Badge>
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground">{activity.item}</p>
-                      <p className="text-sm text-muted-foreground">{activity.time}</p>
-                    </div>
-                  </div>
-                ))}
+                <Badge className="bg-green-100 text-green-800 border-green-200">En ligne</Badge>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Upcoming Maintenance */}
-          <Card className="shadow-glow bg-gradient-card border-0 animate-fade-in">
-            <CardHeader className="bg-gradient-rainbow text-white">
-              <CardTitle className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <Calendar className="h-5 w-5" />
+              
+              <div className="flex items-center justify-between p-4 rounded-xl bg-blue-50 border border-blue-200">
+                <div className="flex items-center gap-3">
+                  <div className="h-3 w-3 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span className="font-medium text-blue-800">API Services</span>
                 </div>
-                Maintenances Planifiées
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Engin</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Priorité</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {upcomingMaintenance.map((maintenance, index) => (
-                      <TableRow 
-                        key={maintenance.code}
-                        className="animate-slide-in hover:bg-muted/30 transition-colors"
-                        style={{ animationDelay: `${index * 100}ms` }}
-                      >
-                        <TableCell>
-                          <div>
-                            <p className="font-medium text-primary hover:text-primary-hover">
-                              {maintenance.code}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {maintenance.designation}
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="border-accent/20 text-accent">
-                            {maintenance.type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {new Date(maintenance.date).toLocaleDateString("fr-FR")}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getPriorityColor(maintenance.priority)}>
-                            {maintenance.priority}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <Badge className="bg-blue-100 text-blue-800 border-blue-200">Opérationnel</Badge>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              
+              <div className="flex items-center justify-between p-4 rounded-xl bg-purple-50 border border-purple-200">
+                <div className="flex items-center gap-3">
+                  <div className="h-3 w-3 bg-purple-500 rounded-full animate-pulse"></div>
+                  <span className="font-medium text-purple-800">Synchronisation</span>
+                </div>
+                <Badge className="bg-purple-100 text-purple-800 border-purple-200">Active</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
