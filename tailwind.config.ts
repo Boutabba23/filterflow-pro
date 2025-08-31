@@ -81,22 +81,25 @@ export default {
 			},
 			backgroundImage: {
 				'gradient-industrial': 'var(--gradient-industrial)',
-				'gradient-maintenance': 'var(--gradient-maintenance)',
+				'gradient-construction': 'var(--gradient-construction)',
 				'gradient-subtle': 'var(--gradient-subtle)',
-				'gradient-vibrant': 'var(--gradient-vibrant)',
-				'gradient-rainbow': 'var(--gradient-rainbow)',
+				'gradient-steel': 'var(--gradient-steel)',
+				'gradient-concrete': 'var(--gradient-concrete)',
 				'gradient-card': 'var(--gradient-card)',
-				'gradient-header': 'var(--gradient-header)'
+				'gradient-header': 'var(--gradient-header)',
+				'gradient-accent': 'var(--gradient-accent)'
 			},
 			boxShadow: {
 				'industrial': 'var(--shadow-industrial)',
 				'card': 'var(--shadow-card)',
-				'vibrant': 'var(--shadow-vibrant)',
-				'glow': 'var(--shadow-glow)'
+				'construction': 'var(--shadow-construction)',
+				'glow': 'var(--shadow-glow)',
+				'steel': 'var(--shadow-steel)'
 			},
 			transitionTimingFunction: {
 				'smooth': 'var(--transition-smooth)',
-				'bounce': 'var(--transition-bounce)'
+				'bounce': 'var(--transition-bounce)',
+				'construction': 'var(--transition-construction)'
 			},
 			keyframes: {
 				'accordion-down': {
